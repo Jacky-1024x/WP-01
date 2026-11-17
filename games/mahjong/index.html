@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>卡五星 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="mahjong.css">
+  <script type="module" src="mahjong.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <h1>卡五星</h1>
+      <button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="stats" id="stats"></div>
+
+    <main class="table" id="table">
+      <section class="seat side left" id="seat2" data-seat="2"></section>
+      <section class="pool" id="pool" aria-label="弃牌区"></section>
+      <section class="seat side right" id="seat1" data-seat="1"></section>
+      <section class="seat self" id="seat0" data-seat="0"></section>
+    </main>
+
+    <div class="controls">
+      <p class="hint" id="hint" aria-live="polite"></p>
+      <div class="actions" id="actions"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>卡五星</h2>
+      <ul>
+        <li>三人玩。牌是筒、条和中、发、白，共 84 张。没有万，没有风牌。红中不能当赖子。</li>
+        <li>只能碰和杠，不能吃。任意一对可以做将。</li>
+        <li>自己摸到的牌，牌型成了就能胡。</li>
+        <li>别人打出的牌，只有这些情况能胡：卡五星（胡 5 筒或 5 条，并且卡在 4 和 6 中间）、杠上炮、碰碰胡、大胡、暗四归。</li>
+        <li>大胡：七对、龙七对、双龙七对、清一色、小三元、大三元、手抓一。</li>
+        <li>暗四归：手里有四张一样的牌，没有亮出来杠，而且这四张都在胡牌牌型里。</li>
+        <li>直杠由放杠的人付 2 分，补杠另外两家各付 1 分，暗杠另外两家各付 2 分，当时结算。胡牌按番数：点炮的人付一份，自摸另外两家各付一份。普通牌型 1 番，封顶 8 番，双龙七对 16 番。</li>
+        <li>上家在左，下家在右。中间按出牌先后排列所有弃牌，牌底的颜色条表示是谁打的，和顶部分数框的颜色对应。</li>
+        <li>点一下选牌，再点一次或点「打出」。牌上方有红点的，打出去就听牌。刚摸到的牌单独放在最右边。</li>
+      </ul>
+      <div class="actions">
+        <button class="btn" id="resetBtn" type="button">分数清零</button>
+        <button class="btn primary" data-close type="button">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal-card">
+      <h2 id="resultTitle"></h2>
+      <p id="resultDetail"></p>
+      <div id="resultHand" class="result-hand"></div>
+      <p id="resultScores"></p>
+      <div class="actions">
+        <button class="btn primary" id="nextBtn" type="button">下一局</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,359 @@
+.app {
+  --c0: #f59e0b;
+  --c1: #38bdf8;
+  --c2: #f472b6;
+  --edge: #1e40af;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0 12px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.stat {
+  padding: 5px 4px 6px;
+  border-radius: 14px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--pc);
+  text-align: center;
+}
+
+.stat.p0 { --pc: var(--c0); }
+.stat.p1 { --pc: var(--c1); }
+.stat.p2 { --pc: var(--c2); }
+
+.stat .label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.stat .value {
+  margin-top: 1px;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat.dealer .label::after {
+  content: "庄";
+  margin-left: 4px;
+  padding: 0 4px;
+  border-radius: 6px;
+  background: #b45309;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.stat.active {
+  box-shadow: 0 0 0 2px var(--pc);
+}
+
+/* 牌桌：左上家、中间弃牌、右下家，底部是自己 */
+.table {
+  flex: 1;
+  min-height: 0;
+  width: calc(100% - 12px);
+  max-width: 620px;
+  margin: 8px auto;
+  padding: 6px;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.09), transparent 60%),
+    linear-gradient(180deg, #1a7a45, #0d4a2b 75%);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08), var(--shadow);
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.seat {
+  min-width: 0;
+  min-height: 0;
+  border-radius: 14px;
+}
+
+.seat.active {
+  box-shadow: inset 0 0 0 2px #fbbf24;
+}
+
+.side {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  background: rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.side.left { grid-column: 1; }
+.side.right { grid-column: 3; }
+
+.side-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.side-head small {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.side .meld {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.back-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.back-col .tile + .tile {
+  margin-top: -11px;
+}
+
+.pool {
+  grid-column: 2;
+  grid-row: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 6px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.pool-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 3px;
+  align-content: flex-start;
+}
+
+.pool-empty {
+  margin: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+
+.pool .tile {
+  width: 25px;
+  height: 34px;
+  pointer-events: none;
+}
+
+.pool .tile.p0 { box-shadow: 0 3px 0 var(--c0), 0 4px 5px rgba(0, 0, 0, 0.35); }
+.pool .tile.p1 { box-shadow: 0 3px 0 var(--c1), 0 4px 5px rgba(0, 0, 0, 0.35); }
+.pool .tile.p2 { box-shadow: 0 3px 0 var(--c2), 0 4px 5px rgba(0, 0, 0, 0.35); }
+
+.pool .tile.last {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+  animation: last-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes last-pulse {
+  50% { outline-color: rgba(255, 255, 255, 0.25); }
+}
+
+.seat.self {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.seat-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.seat-head span:last-child {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.self-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.meld-row {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.self .meld {
+  display: flex;
+  gap: 1px;
+}
+
+.hand {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2px;
+  padding-top: 14px;
+}
+
+.hand .tile {
+  flex: 1 1 0;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  max-width: 44px;
+  aspect-ratio: 3 / 4;
+}
+
+.hand .tile.fresh {
+  margin-left: 8px;
+}
+
+/* 牌 */
+.tile {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 28px;
+  height: 37px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: linear-gradient(#fffdf5, #f1e8d0);
+  box-shadow: 0 3px 0 var(--edge), 0 4px 5px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.tile .face {
+  position: absolute;
+  inset: 2px;
+  display: block;
+}
+
+.tile svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tile.mini {
+  width: 20px;
+  height: 27px;
+  box-shadow: 0 2px 0 var(--edge), 0 2px 3px rgba(0, 0, 0, 0.35);
+}
+
+.tile.lie {
+  width: 30px;
+  height: 22px;
+  box-shadow: 0 2px 0 var(--edge), 0 2px 3px rgba(0, 0, 0, 0.35);
+}
+
+.tile.lie .face {
+  inset: auto;
+  left: 5px;
+  top: -3px;
+  width: 20px;
+  height: 28px;
+  transform: rotate(90deg);
+}
+
+.side.right .tile.lie .face {
+  transform: rotate(-90deg);
+}
+
+.tile.back {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 3px, transparent 3px 7px),
+    linear-gradient(#2563eb, #1e3a8a);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.25), 0 2px 3px rgba(0, 0, 0, 0.4);
+  cursor: default;
+}
+
+.tile.on {
+  transform: translateY(-10px);
+  box-shadow: 0 3px 0 var(--edge), 0 10px 14px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.tile.tenpai::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+.controls {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 12px calc(var(--safe-bottom) + 10px);
+}
+
+.hint {
+  min-height: 22px;
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  min-height: var(--tap);
+}
+
+.actions .btn {
+  min-width: 76px;
+}
+
+.result-hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 2px;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+#resultScores {
+  font-variant-numeric: tabular-nums;
+}

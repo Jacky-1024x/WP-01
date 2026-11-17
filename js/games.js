@@ -29,4 +29,13 @@ self.H5_GAMES = [
     tags: ['纸牌', '休闲'],
     files: ['index.html', 'blackjack.css', 'blackjack.js', 'engine.js'],
   },
+  {
+    id: 'mahjong',
+    name: '卡五星',
+    desc: '湖北三人麻将。屁胡只能自摸，卡五星、杠上炮和大胡可以接炮。',
+    path: 'games/mahjong/',
+    icon: 'icons/mahjong.svg',
+    tags: ['麻将', '人机'],
+    files: ['index.html', 'mahjong.css', 'mahjong.js', 'engine.js', 'ai.js', 'tiles.js'],
+  },
 ];

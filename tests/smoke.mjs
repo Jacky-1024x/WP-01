@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { createSolved, isSolved, isSolvable, shuffle, moveAt, moveDirection } from '../games/klotski/puzzle.js';
 import { chooseMove, findWinLine, shapeAt, SHAPE, BLACK, WHITE, SIZE } from '../games/gomoku/ai.js';
 import * as bj from '../games/blackjack/engine.js';
+import * as mj from '../games/mahjong/engine.js';
+import { chooseClaim, chooseSelfAction, shanten } from '../games/mahjong/ai.js';
 
 let passed = 0;
 function test(name, fn) {
@@ -428,6 +430,199 @@ test('随机对局 3000 局：资金守恒、阶段正确、牌靴自动重洗',
     assert.ok(g.hands.every((h) => h.result));
   }
   assert.ok(reshuffles > 0);
+});
+
+console.log('卡五星');
+
+const bamboo = (rank) => rank - 1;
+const dot = (rank) => 8 + rank;
+const Z = 18;
+const F = 19;
+const B = 20;
+const copies = (tile, n) => Array(n).fill(tile);
+const chow = (tile) => [tile, tile + 1, tile + 2];
+
+const plain = [
+  ...chow(bamboo(1)),
+  ...chow(bamboo(4)),
+  ...chow(bamboo(7)),
+  ...chow(dot(1)),
+  dot(9),
+  dot(9),
+];
+
+test('屁胡可以自摸，别人打出的不能胡', () => {
+  const self = mj.judgeWin(plain, [], dot(9), { selfDraw: true, gangPao: false, gangDraw: false });
+  assert.equal(self.fan, 1);
+  assert.deepEqual(self.names, ['屁胡']);
+  assert.equal(mj.judgeWin(plain, [], dot(9), { selfDraw: false, gangPao: false, gangDraw: false }), null);
+});
+
+test('卡在四五六中间的五可以接炮，一对五不算卡五星', () => {
+  const ka = mj.judgeWin(plain, [], bamboo(5), { selfDraw: false, gangPao: false, gangDraw: false });
+  assert.equal(ka.fan, 2);
+  assert.ok(ka.names.includes('卡五星'));
+  const pairOnly = [
+    ...chow(bamboo(1)),
+    ...chow(bamboo(7)),
+    ...chow(dot(1)),
+    ...chow(dot(4)),
+    bamboo(5),
+    bamboo(5),
+  ];
+  assert.equal(mj.judgeWin(pairOnly, [], bamboo(5), { selfDraw: false, gangPao: false, gangDraw: false }), null);
+  const self = mj.judgeWin(pairOnly, [], bamboo(5), { selfDraw: true, gangPao: false, gangDraw: false });
+  assert.deepEqual(self.names, ['屁胡']);
+});
+
+test('杠上炮、碰碰胡、七对、清一色、暗四归、三元和手抓一可以接炮', () => {
+  const gangPao = mj.judgeWin(plain, [], dot(9), { selfDraw: false, gangPao: true, gangDraw: false });
+  assert.equal(gangPao.fan, 2);
+  assert.ok(gangPao.names.includes('杠上炮'));
+
+  const pung = [...copies(bamboo(1), 3), ...copies(bamboo(2), 3), ...copies(bamboo(3), 3), ...copies(dot(4), 3), dot(9), dot(9)];
+  const pengpeng = mj.judgeWin(pung, [], dot(9), { selfDraw: false, gangPao: false, gangDraw: false });
+  assert.ok(pengpeng.names.includes('碰碰胡'));
+
+  const pairs = [1, 2, 3, 4, 5, 6].flatMap((rank) => copies(bamboo(rank), 2)).concat(copies(dot(1), 2));
+  const seven = mj.judgeWin(pairs, [], dot(1), { selfDraw: false, gangPao: false, gangDraw: false });
+  assert.equal(seven.fan, 4);
+  assert.deepEqual(seven.names, ['七对']);
+
+  const dragon = [...copies(bamboo(1), 4), ...[2, 3, 4, 5, 6].flatMap((rank) => copies(bamboo(rank), 2))];
+  assert.equal(mj.judgeWin(dragon, [], bamboo(1), { selfDraw: false, gangPao: false, gangDraw: false }).fan, 8);
+  const twoDragons = [...copies(bamboo(1), 4), ...copies(bamboo(2), 4), ...[3, 4, 5].flatMap((rank) => copies(bamboo(rank), 2))];
+  assert.equal(mj.judgeWin(twoDragons, [], bamboo(5), { selfDraw: false, gangPao: false, gangDraw: false }).fan, 16);
+
+  const flush = [
+    ...chow(bamboo(1)),
+    ...chow(bamboo(4)),
+    ...chow(bamboo(7)),
+    ...chow(bamboo(2)),
+    bamboo(9),
+    bamboo(9),
+  ];
+  const qing = mj.judgeWin(flush, [], bamboo(9), { selfDraw: false, gangPao: false, gangDraw: false });
+  assert.equal(qing.fan, 4);
+  assert.ok(qing.names.includes('清一色'));
+
+  const four = [
+    bamboo(4),
+    ...copies(bamboo(5), 4),
+    bamboo(6),
+    ...chow(bamboo(7)),
+    ...chow(dot(1)),
+    dot(9),
+    dot(9),
+  ];
+  const ansi = mj.judgeWin(four, [], dot(9), { selfDraw: false, gangPao: false, gangDraw: false });
+  assert.ok(ansi.names.includes('暗四归'));
+
+  const xiao = [...copies(Z, 3), ...copies(F, 3), B, B, ...chow(bamboo(1)), ...chow(bamboo(4))];
+  assert.ok(mj.judgeWin(xiao, [], B, { selfDraw: false, gangPao: false, gangDraw: false }).names.includes('小三元'));
+  const da = [...copies(Z, 3), ...copies(F, 3), ...copies(B, 3), ...copies(bamboo(1), 3), bamboo(2), bamboo(2)];
+  const dasan = mj.judgeWin(da, [], bamboo(2), { selfDraw: false, gangPao: false, gangDraw: false });
+  assert.ok(dasan.names.includes('大三元'));
+  assert.equal(dasan.fan, 8);
+
+  const melds = [
+    { type: 'peng', tile: bamboo(1) },
+    { type: 'peng', tile: bamboo(2) },
+    { type: 'peng', tile: dot(3) },
+    { type: 'minggang', tile: dot(4) },
+  ];
+  const grab = mj.judgeWin([Z, Z], melds, Z, { selfDraw: false, gangPao: false, gangDraw: false });
+  assert.ok(grab.names.includes('手抓一'));
+});
+
+test('红中不能代替别的牌', () => {
+  const broken = [...chow(bamboo(1)), ...chow(bamboo(4)), ...chow(bamboo(7)), ...chow(dot(1)), Z, F];
+  assert.equal(mj.judgeWin(broken, [], F, { selfDraw: true, gangPao: false, gangDraw: false }), null);
+});
+
+test('向听：成牌是 -1，听牌是 0', () => {
+  assert.equal(shanten(mj.countTiles(plain), 0), -1);
+  assert.equal(shanten(mj.countTiles(plain.slice(0, -1)), 0), 0);
+  const sixPairs = [1, 2, 3, 4, 5, 6].flatMap((rank) => copies(bamboo(rank), 2)).concat(dot(1));
+  assert.equal(shanten(mj.countTiles(sixPairs), 0), 0);
+});
+
+test('发牌 84 张守恒，庄家 14 张', () => {
+  const state = mj.createRound([0, 0, 0], 0, mulberry32(3));
+  assert.equal(mj.tileTotal(state), 84);
+  assert.equal(state.players[0].concealed.length, 14);
+  assert.equal(state.players[1].concealed.length, 13);
+  assert.equal(state.players[2].concealed.length, 13);
+  assert.equal(mj.remaining(state), 44);
+});
+
+test('直杠、暗杠、补杠当时计分，杠后打出的牌算杠上炮', () => {
+  const state = mj.createRound([3, 5, 7], 1, mulberry32(9));
+  state.turn = 1;
+  state.phase = 'discard';
+  state.canHuSelf = false;
+  state.players[0].melds = [];
+  state.players[1].melds = [];
+  state.players[2].melds = [];
+  state.players[0].concealed = [...copies(bamboo(1), 3), ...copies(bamboo(2), 2), dot(3), dot(4), dot(6), dot(7), dot(8), dot(9), F, B];
+  state.players[1].concealed = [bamboo(1), ...copies(bamboo(2), 2), bamboo(3), bamboo(4), bamboo(5), bamboo(6), bamboo(7), bamboo(8), bamboo(9), dot(1), dot(2), dot(3), dot(5)];
+  state.players[2].concealed = [bamboo(9), dot(1), dot(2), dot(3), dot(4), dot(5), dot(6), dot(7), dot(8), dot(9), Z, F, B];
+  for (const player of state.players) {
+    player.discards = [];
+    player.concealed.sort((a, b) => a - b);
+  }
+  mj.doDiscard(state, bamboo(1));
+  assert.equal(state.claimPlayer, 0);
+  assert.equal(state.options.hu, false);
+  assert.equal(state.options.gang, true);
+  mj.doResponse(state, 'gang');
+  assert.equal(state.players[0].score, 5);
+  assert.equal(state.players[1].score, 3);
+  assert.equal(state.gangDraw, true);
+  const discard = state.players[0].concealed[0];
+  mj.doDiscard(state, discard);
+  assert.equal(state.lastDiscard.gangPao, true);
+
+  const an = mj.createRound([0, 0, 0], 0, mulberry32(4));
+  an.players[0].concealed = [...copies(Z, 4), ...chow(bamboo(1)), ...chow(bamboo(4)), ...chow(dot(1)), dot(9)];
+  an.players[0].concealed.sort((a, b) => a - b);
+  an.players[0].melds = [];
+  mj.doSelfGang(an, { kind: 'an', tile: Z });
+  assert.equal(an.players[0].score, 4);
+  assert.equal(an.players[1].score, -2);
+  assert.equal(an.players[2].score, -2);
+
+  const bu = mj.createRound([0, 0, 0], 0, mulberry32(5));
+  bu.players[0].melds = [{ type: 'peng', tile: F, from: 1 }];
+  bu.players[0].concealed = [F, ...chow(bamboo(1)), ...chow(bamboo(4)), ...chow(dot(1)), dot(9), dot(9)];
+  bu.players[0].concealed.sort((a, b) => a - b);
+  mj.doSelfGang(bu, { kind: 'bu', tile: F });
+  assert.equal(bu.players[0].score, 2);
+  assert.equal(bu.players[1].score, -1);
+  assert.equal(bu.players[2].score, -1);
+});
+
+test('随机对局能打完，牌数和分数都守恒', () => {
+  const rng = mulberry32(11);
+  for (let game = 0; game < 12; game++) {
+    const state = mj.createRound([0, 0, 0], game % 3, rng);
+    let guard = 0;
+    while (state.phase !== 'end' && guard++ < 500) {
+      assert.equal(mj.tileTotal(state), 84);
+      if (state.phase === 'discard') {
+        const action = chooseSelfAction(state, rng);
+        if (action.type === 'hu') mj.doSelfHu(state);
+        else if (action.type === 'gang') mj.doSelfGang(state, action.choice);
+        else mj.doDiscard(state, action.tile);
+      } else {
+        mj.doResponse(state, chooseClaim(state));
+      }
+    }
+    assert.equal(state.phase, 'end', `第 ${game} 局没有结束`);
+    assert.equal(mj.tileTotal(state), 84);
+    assert.equal(state.pool.length, state.players.reduce((sum, player) => sum + player.discards.length, 0));
+    assert.equal(state.players.reduce((sum, player) => sum + player.score, 0), 0);
+  }
 });
 
 console.log(`\n全部 ${passed} 项通过`);
