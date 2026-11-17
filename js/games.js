@@ -65,4 +65,13 @@ self.H5_GAMES = [
     tags: ['益智', '逻辑'],
     files: ['index.html', 'sudoku.css', 'sudoku.js', 'board.js', 'solver.js', 'generator.js', 'puzzles.js', 'worker.js'],
   },
+  {
+    id: 'tetris',
+    name: '俄罗斯方块',
+    desc: '经典消行，马拉松 / 40 行竞速 / 限时 2 分钟三种模式；支持暂存、影子和 T-Spin。',
+    path: 'games/tetris/',
+    icon: 'icons/tetris.svg',
+    tags: ['休闲', '动作'],
+    files: ['index.html', 'tetris.css', 'tetris.js', 'input.js', 'engine.js'],
+  },
 ];

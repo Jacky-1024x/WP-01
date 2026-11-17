@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>俄罗斯方块 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="tetris.css">
+  <script type="module" src="tetris.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <h1>俄罗斯方块</h1>
+      <button class="icon-btn" id="pauseBtn" data-sfx="none" aria-label="暂停">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="hud" id="hud">
+      <div><span id="hudL0">分数</span><b id="hudV0">0</b></div>
+      <div><span id="hudL1">等级</span><b id="hudV1">1</b></div>
+      <div><span id="hudL2">行数</span><b id="hudV2">0</b></div>
+    </div>
+
+    <main class="play" id="play">
+      <div class="side">
+        <span class="side-label">暂存</span>
+        <button class="side-box hold-box" id="holdBox" data-sfx="none" aria-label="暂存"><canvas id="holdCanvas"></canvas></button>
+      </div>
+      <div class="well" id="well">
+        <canvas id="boardCanvas" aria-label="场地"></canvas>
+        <div class="overlay" id="overlay"><div class="countdown" id="countdown"></div></div>
+      </div>
+      <div class="side">
+        <span class="side-label">下一个</span>
+        <div class="side-box"><canvas id="nextCanvas"></canvas></div>
+      </div>
+    </main>
+
+    <div class="pad" id="pad">
+      <div class="pad-grp rot">
+        <button class="key key-cw" data-act="cw" data-sfx="none" aria-label="顺时针旋转">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 12.5a6.5 6.5 0 1 1-2-4.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M17.5 3.5v4.8h-4.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <small>旋转</small>
+        </button>
+        <button class="key key-ccw" data-act="ccw" data-sfx="none" aria-label="逆时针旋转">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 12.5a6.5 6.5 0 1 0 2-4.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M6.5 3.5v4.8h4.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <small>逆转</small>
+        </button>
+        <button class="key key-hard" data-act="hard" data-sfx="none" aria-label="硬降">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M6 20h12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          硬降
+        </button>
+      </div>
+      <div class="pad-grp move">
+        <button class="key key-left" data-act="left" data-sfx="none" aria-label="左移">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M11 6.5 5.5 12l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="key key-right" data-act="right" data-sfx="none" aria-label="右移">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="key key-soft" data-act="soft" data-sfx="none" aria-label="软降">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5v14M6.5 13l5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <small>软降</small>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="newModal" hidden>
+    <div class="modal-card">
+      <h2>新游戏</h2>
+      <div class="mode-list" id="modeList">
+        <button data-mode="marathon"><b>马拉松</b><span>一直玩到堆满，比最高分</span></button>
+        <button data-mode="sprint"><b>40 行竞速</b><span>尽快消掉 40 行，比用时</span></button>
+        <button data-mode="ultra"><b>限时 2 分钟</b><span>2 分钟内尽量多得分</span></button>
+      </div>
+      <div class="level-pick" id="levelPick">
+        <span>起始等级</span>
+        <div class="level-grid" id="levelGrid"></div>
+      </div>
+      <p class="best" id="newBest"></p>
+      <div class="actions"><button class="btn primary" id="newStart">开始</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="pauseModal" hidden>
+    <div class="modal-card">
+      <h2>已暂停</h2>
+      <p id="pauseInfo"></p>
+      <div class="setting">
+        <span>音效</span>
+        <button class="icon-btn sound-btn" data-sound-toggle aria-label="音效开关"></button>
+      </div>
+      <div class="setting">
+        <span>按键布局</span>
+        <div class="segmented" id="layoutSelect" role="group" aria-label="按键布局">
+          <button data-layout="rot">左手旋转</button>
+          <button data-layout="move">左手移动</button>
+        </div>
+      </div>
+      <div class="setting">
+        <span>移动速度</span>
+        <div class="segmented" id="speedSelect" role="group" aria-label="移动速度">
+          <button data-speed="slow">慢</button>
+          <button data-speed="mid">中</button>
+          <button data-speed="fast">快</button>
+        </div>
+      </div>
+      <div class="setting">
+        <span>影子</span>
+        <div class="segmented" id="ghostSelect" role="group" aria-label="影子">
+          <button data-ghost="on">开</button>
+          <button data-ghost="off">关</button>
+        </div>
+      </div>
+      <div class="setting">
+        <span>屏幕按键</span>
+        <div class="segmented" id="padSelect" role="group" aria-label="屏幕按键">
+          <button data-pad="on">显示</button>
+          <button data-pad="off">隐藏</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="pauseRestart">重新开始</button>
+        <button class="btn primary" id="pauseResume">继续</button>
+      </div>
+      <a class="exit-link" href="../../">退出到主页</a>
+    </div>
+  </div>
+
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal-card">
+      <h2 id="resultTitle"></h2>
+      <div class="result-big" id="resultBig"></div>
+      <p id="resultDetail"></p>
+      <div class="record" id="resultRecord" hidden>新纪录！</div>
+      <div class="stats" id="resultStats"></div>
+      <div class="actions">
+        <button class="btn" id="resultClose">查看场地</button>
+        <button class="btn" id="resultMode">换模式</button>
+        <button class="btn primary" id="resultAgain">再来一局</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h2>放弃本局？</h2>
+      <p id="confirmText"></p>
+      <div class="actions">
+        <button class="btn" data-close>取消</button>
+        <button class="btn primary" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>玩法说明</h2>
+      <ul>
+        <li>移动、旋转落下的方块，把横行填满就会消除。方块堆到顶部就结束。</li>
+        <li><b>左手</b>：旋转（大按钮）、逆转、硬降（直接落到底）。</li>
+        <li><b>右手</b>：左移、右移、软降（按住加速）。左右键按住会连续移动，手指可以在 ← → ↓ 之间直接滑动。</li>
+        <li>点场地左侧的<b>暂存</b>格，把当前方块存起来，以后换出来用。每个方块只能暂存一次。</li>
+        <li>一次消 4 行、T 方块转进缝里消行（T-Spin）得分最高，连续做到还有加成。</li>
+        <li>电脑上：← → 移动，↓ 软降，空格硬降，↑ / X 旋转，Z 逆转，C / Shift 暂存，Esc 暂停。</li>
+      </ul>
+      <p class="help-tip">暂停菜单里可以对调左右按键、调快移动速度。</p>
+      <div class="actions"><button class="btn primary" data-close>知道了</button></div>
+    </div>
+  </div>
+</body>
+</html>

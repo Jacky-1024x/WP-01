@@ -1,0 +1,560 @@
+/* 左侧一个返回按钮、右侧暂停和帮助两个按钮：标题左侧补一个按钮宽度才能居中 */
+.topbar h1 {
+  padding-left: var(--tap);
+}
+
+/* 状态栏：三格数值 */
+.hud {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.hud div {
+  padding: 4px 4px 5px;
+  border-radius: 12px;
+  background: var(--border);
+  text-align: center;
+}
+
+.hud span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.hud b {
+  display: block;
+  font-size: 18px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud b.pop {
+  animation: hud-pop 0.4s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.hud b.warn {
+  color: var(--danger);
+}
+
+@keyframes hud-pop {
+  40% { transform: scale(1.35); color: var(--primary); }
+}
+
+/* 游戏区：暂存 | 场地 | 预览。两侧栏宽度必须与 tetris.js 中的 SIDE_W / PLAY_GAP / PLAY_PAD 保持一致 */
+.play {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  overflow: hidden;
+}
+
+.side {
+  width: 52px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 2px;
+}
+
+.side-label {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.side-box {
+  display: block;
+  width: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: #1f2937;
+}
+
+.side-box canvas {
+  display: block;
+}
+
+.hold-box {
+  cursor: pointer;
+  touch-action: none;
+}
+
+.hold-box.shake {
+  animation: shake 0.25s ease;
+}
+
+/* 场地 */
+.well {
+  position: relative;
+  flex-shrink: 0;
+  border: 3px solid #374151;
+  border-radius: 8px;
+  background: #111827;
+  transition: border-color 0.3s ease;
+}
+
+.well canvas {
+  display: block;
+  border-radius: 4px;
+}
+
+.well.covered canvas {
+  visibility: hidden;
+}
+
+.well.danger {
+  animation: danger 1.4s ease-in-out infinite;
+}
+
+.well.sink {
+  animation: sink 0.14s ease-out;
+}
+
+.well.flash {
+  animation: well-flash 0.45s ease-out;
+}
+
+.well.tetris {
+  animation: well-tetris 0.5s ease-out;
+}
+
+@keyframes danger {
+  50% { border-color: #ef4444; box-shadow: 0 0 14px rgba(239, 68, 68, 0.45); }
+}
+
+@keyframes sink {
+  40% { transform: translateY(2px); }
+}
+
+@keyframes well-flash {
+  30% { border-color: #818cf8; box-shadow: 0 0 18px rgba(129, 140, 248, 0.6); }
+}
+
+@keyframes well-tetris {
+  30% { border-color: #22d3ee; box-shadow: 0 0 22px rgba(34, 211, 238, 0.7); }
+}
+
+@keyframes shake {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.countdown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 72px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+}
+
+.countdown.tick {
+  animation: count 0.4s ease-out;
+}
+
+@keyframes count {
+  from { transform: scale(1.6); opacity: 0; }
+}
+
+.popup {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30%;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  animation: popup 1.1s ease-out forwards;
+}
+
+.popup b {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.popup span {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fde047;
+}
+
+.popup.tetris b {
+  color: #22d3ee;
+  font-size: 30px;
+}
+
+.popup.spin b {
+  color: #c084fc;
+}
+
+.popup.small b {
+  font-size: 18px;
+}
+
+@keyframes popup {
+  0% { transform: scale(0.6); opacity: 0; }
+  15% { transform: scale(1.08); opacity: 1; }
+  25% { transform: scale(1); }
+  75% { opacity: 1; transform: translateY(-10px); }
+  100% { opacity: 0; transform: translateY(-24px); }
+}
+
+/* 屏幕按键：默认左手旋转组、右手移动组；.swap 时左右对调，旋转键始终靠屏幕边缘 */
+.pad {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 6px 18px calc(var(--safe-bottom) + 12px);
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.pad[hidden] {
+  display: none;
+}
+
+.pad.swap {
+  flex-direction: row-reverse;
+}
+
+.pad-grp {
+  display: grid;
+  gap: 10px 12px;
+  align-items: center;
+  justify-items: center;
+}
+
+.pad-grp.rot {
+  grid-template-columns: 68px 48px;
+  grid-template-rows: 68px 52px;
+  grid-template-areas: "cw ccw" "hard hard";
+}
+
+.pad.swap .pad-grp.rot {
+  grid-template-columns: 48px 68px;
+  grid-template-areas: "ccw cw" "hard hard";
+}
+
+.pad-grp.move {
+  grid-template-columns: 62px 62px;
+  grid-template-rows: 62px 56px;
+  grid-template-areas: "left right" "soft soft";
+}
+
+.key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text);
+  cursor: pointer;
+  touch-action: none;
+  transition: transform 0.06s ease, filter 0.06s ease;
+}
+
+.key svg {
+  width: 26px;
+  height: 26px;
+}
+
+.key small {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1;
+}
+
+.key.on {
+  transform: scale(0.94);
+  filter: brightness(0.85);
+}
+
+@media (prefers-color-scheme: dark) {
+  .key.on {
+    filter: brightness(1.5);
+  }
+}
+
+.key-cw {
+  grid-area: cw;
+  width: 68px;
+  height: 68px;
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.key-cw small {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.key-cw svg {
+  width: 30px;
+  height: 30px;
+}
+
+.key-ccw {
+  grid-area: ccw;
+  width: 48px;
+  height: 48px;
+}
+
+.key-ccw svg {
+  width: 20px;
+  height: 20px;
+}
+
+.key-hard {
+  grid-area: hard;
+  flex-direction: row;
+  gap: 6px;
+  width: 128px;
+  height: 52px;
+  border-radius: 26px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.key-hard svg {
+  width: 20px;
+  height: 20px;
+}
+
+.key-left {
+  grid-area: left;
+}
+
+.key-right {
+  grid-area: right;
+}
+
+.key-left,
+.key-right {
+  width: 62px;
+  height: 62px;
+}
+
+.key-soft {
+  grid-area: soft;
+  width: 56px;
+  height: 56px;
+}
+
+.key-soft svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* 新游戏面板 */
+.mode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mode-list button {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--bg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mode-list b {
+  font-size: 16px;
+}
+
+.mode-list span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.mode-list button[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.level-pick {
+  margin-top: 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.level-pick[hidden] {
+  display: none;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.level-grid button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--bg);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.level-grid button[aria-pressed="true"] {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.modal-card p.best {
+  min-height: 1.6em;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+/* 暂停菜单中的设置 */
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.setting .segmented {
+  width: 188px;
+}
+
+.setting .segmented button {
+  min-height: 34px;
+  font-size: 14px;
+}
+
+.sound-btn {
+  width: 44px;
+  height: 40px;
+  background: var(--border);
+}
+
+.sound-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.exit-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+/* 结果弹窗 */
+.result-big {
+  font-size: 40px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.record {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 12px;
+  border-radius: 99px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 700;
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) 0.2s backwards;
+}
+
+.record[hidden] {
+  display: none;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.stats div {
+  padding: 10px 4px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.stats b {
+  display: block;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+#resultModal .actions .btn {
+  padding: 0 8px;
+  font-size: 15px;
+}
+
+.help-tip {
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .well.danger,
+  .well.sink,
+  .well.flash,
+  .well.tetris,
+  .hud b.pop {
+    animation: none;
+  }
+}

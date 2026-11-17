@@ -11,6 +11,7 @@ import * as sdSolver from '../games/sudoku/solver.js';
 import * as sdGen from '../games/sudoku/generator.js';
 import * as sd from '../games/sudoku/board.js';
 import { BANK as SD_BANK } from '../games/sudoku/puzzles.js';
+import * as tt from '../games/tetris/engine.js';
 
 let passed = 0;
 function test(name, fn) {
@@ -1183,6 +1184,355 @@ test('存档还原：合法存档原样恢复，篡改或不一致的存档被�
   assert.equal(sd.restoreGame({ ...save, hintsLeft: 9 }), null);
   assert.equal(sd.restoreGame({ ...save, notes: save.notes.map(() => 1 << 12) }), null);
   assert.deepEqual(sd.restoreGame({ ...save, undo: [[{ i: 99 }]] }).undo, [], '撤销栈异常时清空');
+});
+
+console.log('俄罗斯方块');
+
+const TT_STEP = 1000 / 60;
+
+// rows：从可见区底部往上数的若干行（字符串数组，最后一个是第 19 行），'.' 为空，其他字符为已占
+function ttGame(rows = [], piece = null, opts = {}) {
+  const g = tt.createGame({ seed: 1, ...opts });
+  g.board.fill(0);
+  rows.forEach((row, k) => {
+    const y = tt.ROWS - rows.length + k;
+    [...row].forEach((ch, x) => {
+      if (ch !== '.') g.board[(y + tt.BUFFER) * tt.COLS + x] = 1;
+    });
+  });
+  if (piece) g.piece = { rot: 0, ...piece };
+  g.events.length = 0;
+  return g;
+}
+
+const ttRow = (g, y) => Array.from({ length: tt.COLS }, (_, x) => (tt.cell(g, x, y) ? '#' : '.')).join('');
+const ttEvents = (g, type) => g.events.filter((e) => e.type === type);
+
+test('7 袋随机：每袋 7 种各一个；同一种子序列相同', () => {
+  const sequence = (seed) => {
+    const g = tt.createGame({ seed });
+    const seq = [];
+    for (let i = 0; i < 70; i++) {
+      seq.push(g.piece.type);
+      tt.hardDrop(g);
+      g.board.fill(0);
+    }
+    return seq.join('');
+  };
+  const a = sequence(42);
+  for (let i = 0; i < 70; i += 7) assert.equal([...a.slice(i, i + 7)].sort().join(''), 'IJLOSTZ');
+  assert.equal(sequence(42), a);
+  assert.notEqual(sequence(43), a);
+});
+
+test('方块形状与出生：4 个朝向各 4 格；出生在第 3–6 列并立刻下落一格', () => {
+  for (const type of tt.TYPES) {
+    for (const cells of tt.SHAPES[type]) assert.equal(new Set(cells.map(String)).size, 4);
+  }
+  const g = tt.createGame({ seed: 7 });
+  const xs = tt.cellsOf(g.piece).map(([x]) => x);
+  assert.ok(Math.min(...xs) >= 3 && Math.max(...xs) <= 6);
+  assert.equal(Math.max(...tt.cellsOf(g.piece).map(([, y]) => y)), 0, '出生后最下面一格进入可见区第 0 行');
+});
+
+test('SRS：空地不踢墙；贴墙时按踢墙表偏移；转不过去则不动', () => {
+  const g = ttGame([], { type: 'T', x: 4, y: 5 });
+  assert.ok(tt.rotate(g, 1));
+  assert.deepEqual([g.piece.rot, g.piece.x, g.piece.y, g.lastKick], [1, 4, 5, 0]);
+
+  // T 竖着贴左墙（R 朝向占第 0 列），转到 2 时第 1 个测试越界，第 2 个测试 (+1, 0) 成功
+  const t = ttGame([], { type: 'T', rot: 1, x: -1, y: 5 });
+  assert.ok(tt.rotate(t, 1));
+  assert.deepEqual([t.piece.rot, t.piece.x, t.lastKick], [2, 0, 1]);
+
+  // I 竖着贴左墙（L 朝向占第 0 列），转回 0 时用 (+1, 0)
+  const i = ttGame([], { type: 'I', rot: 3, x: -1, y: 5 });
+  assert.ok(tt.rotate(i, 1));
+  assert.deepEqual([i.piece.rot, i.piece.x, i.lastKick], [0, 0, 1]);
+
+  // 被完全卡住：转不过去，位置不变
+  const stuck = ttGame(Array(20).fill('###...####'), { type: 'I', rot: 1, x: 2, y: 10 });
+  assert.equal(tt.rotate(stuck, 1), false);
+  assert.deepEqual([stuck.piece.rot, stuck.piece.x, stuck.piece.y], [1, 2, 10]);
+});
+
+test('锁定延迟：着地 500ms 锁定；移动重置最多 15 次；落到更低处重置次数清零', () => {
+  const g = ttGame([], { type: 'O', x: 3, y: 18 });
+  tt.tick(g, 499);
+  assert.ok(g.piece, '499ms 还没锁定');
+  tt.tick(g, 1);
+  assert.equal(g.pieces, 1);
+
+  const r = ttGame([], { type: 'O', x: 3, y: 18 });
+  for (let k = 0; k < 15; k++) {
+    tt.tick(r, 400);
+    assert.ok(tt.move(r, k % 2 ? 1 : -1));
+  }
+  assert.equal(r.lockResets, 15);
+  assert.equal(r.pieces, 0);
+  tt.tick(r, TT_STEP);
+  assert.equal(r.pieces, 1, '重置次数用完后着地立即锁定');
+
+  // 在台阶上用掉几次重置，再移下台阶落到更低处：重置次数清零
+  const s = ttGame(['....######'], { type: 'O', x: 4, y: 17 });
+  s.lowestY = 17;
+  tt.tick(s, 300);
+  assert.ok(tt.move(s, 1));
+  assert.ok(tt.move(s, -1));
+  assert.ok(tt.move(s, -1));
+  assert.equal(s.lockResets, 3);
+  assert.ok(tt.move(s, -1));
+  assert.ok(tt.move(s, -1));
+  tt.tick(s, 1000);
+  assert.equal(s.piece.y, 18);
+  assert.equal(s.lockResets, 0);
+});
+
+test('重力：1 级每格 1 秒；高等级一帧多格但逐格检查，不穿过横档；软降 20 倍并每格 1 分', () => {
+  assert.equal(Math.round(tt.gravityMs(1)), 1000);
+  assert.equal(Math.round(tt.gravityMs(10)), 64);
+  assert.ok(tt.gravityMs(20) < 1);
+  const g = ttGame([], { type: 'T', x: 4, y: 0 });
+  tt.tick(g, 999);
+  assert.equal(g.piece.y, 0);
+  tt.tick(g, 1);
+  assert.equal(g.piece.y, 1);
+
+  const bar = Array(20).fill('..........');
+  bar[10] = '##########';
+  const fast = ttGame(bar, { type: 'I', x: 3, y: -1 });
+  fast.level = 20;
+  tt.tick(fast, TT_STEP);
+  assert.equal(Math.max(...tt.cellsOf(fast.piece).map(([, y]) => y)), 9, '停在横档上方');
+
+  const soft = ttGame([], { type: 'T', x: 4, y: 0 });
+  tt.tick(soft, 100, true);
+  assert.equal(soft.piece.y, 2);
+  assert.equal(soft.score, 2);
+});
+
+test('消行：不相邻的两行同时消除，上方整体下移；消行动画结束后才出下一个', () => {
+  const g = ttGame(['..........', '.#########', '..########', '.#########'], { type: 'I', rot: 1, x: -2, y: 5 });
+  tt.hardDrop(g);
+  assert.deepEqual(g.clearing.rows, [17, 19]);
+  assert.equal(g.piece, null);
+  assert.equal(g.lines, 2);
+  tt.tick(g, 199);
+  assert.ok(g.clearing);
+  tt.tick(g, 1);
+  assert.equal(g.clearing, null);
+  assert.ok(g.piece, '动画结束后出生下一个方块');
+  assert.equal(ttRow(g, 19), '#.########');
+  assert.equal(ttRow(g, 18), '#.........');
+  assert.equal(ttRow(g, 17), '..........');
+  assert.equal(g.score, 300 + 2 * 11, '消 2 行 300 分 + 硬降 11 格');
+});
+
+test('计分：Tetris、背靠背 ×1.5、连击、普通消行中断背靠背；按等级升级', () => {
+  const well = Array(9).fill('.#########');
+  const g = ttGame(well, { type: 'I', rot: 1, x: -2, y: 0 });
+  tt.hardDrop(g);
+  tt.tick(g, 300);
+  let clear = ttEvents(g, 'clear').pop();
+  assert.deepEqual([clear.lines, clear.points, clear.b2b, clear.combo], [4, 800, false, 0]);
+  g.events.length = 0;
+  g.piece = { type: 'I', rot: 1, x: -2, y: 0 };
+  tt.hardDrop(g);
+  clear = ttEvents(g, 'clear').pop();
+  assert.deepEqual([clear.lines, clear.points, clear.b2b, clear.combo], [4, 1200 + 50, true, 1]);
+  tt.tick(g, 300);
+  g.events.length = 0;
+  g.piece = { type: 'O', rot: 0, x: -1, y: 0 };
+  tt.hardDrop(g);
+  assert.equal(ttEvents(g, 'clear').length, 0, '剩下的一行没填满，不消行');
+  assert.equal(g.combo, -1, '没消行，连击中断');
+  assert.equal(g.b2b, true, '不消行不影响背靠背');
+
+  const lv = ttGame(['.#########'], { type: 'I', rot: 1, x: -2, y: 0 }, { startLevel: 5 });
+  lv.lines = 9;
+  tt.hardDrop(lv);
+  assert.equal(lv.level, 6);
+  assert.equal(ttEvents(lv, 'levelup').length, 1);
+  assert.equal(ttEvents(lv, 'clear')[0].points, 100 * 5, '按消行前的等级计分');
+  assert.equal(lv.b2b, false);
+
+  const sprint = tt.createGame({ mode: 'sprint', startLevel: 8 });
+  assert.equal(sprint.level, 1, '竞速与限时固定 1 级');
+});
+
+test('T-Spin：三角规则判定 T-Spin / Mini；第 5 个踢墙偏移一律算 T-Spin；最后一步不是旋转则不算', () => {
+  const tsd = () => ttGame(['..#.......', '##...#####', '###.######'], { type: 'T', rot: 2, x: 2, y: 17 });
+  const g = tsd();
+  Object.assign(g, { lastRotate: true, lastKick: 0 });
+  tt.hardDrop(g);
+  const ev = ttEvents(g, 'clear')[0];
+  assert.deepEqual([ev.spin, ev.lines, ev.points], ['tspin', 2, 1200]);
+  assert.equal(g.tspins, 1);
+
+  const plain = tsd();
+  tt.hardDrop(plain);
+  assert.deepEqual([ttEvents(plain, 'clear')[0].spin, ttEvents(plain, 'clear')[0].points], [null, 300]);
+
+  const mini = () => ttGame(['#.........', '...#######'], { type: 'T', rot: 0, x: 0, y: 18 });
+  const m = mini();
+  Object.assign(m, { lastRotate: true, lastKick: 0 });
+  tt.hardDrop(m);
+  assert.deepEqual([ttEvents(m, 'clear')[0].spin, ttEvents(m, 'clear')[0].points], ['mini', 200]);
+
+  const k5 = mini();
+  Object.assign(k5, { lastRotate: true, lastKick: 4 });
+  tt.hardDrop(k5);
+  assert.deepEqual([ttEvents(k5, 'clear')[0].spin, ttEvents(k5, 'clear')[0].points], ['tspin', 800]);
+
+  // 旋转后又移动或自然下落，最后一步就不是旋转了
+  const moved = ttGame([], { type: 'T', x: 4, y: 5 });
+  tt.rotate(moved, 1);
+  assert.equal(moved.lastRotate, true);
+  tt.move(moved, 1);
+  assert.equal(moved.lastRotate, false);
+  tt.rotate(moved, 1);
+  tt.tick(moved, 1000);
+  assert.equal(moved.lastRotate, false);
+});
+
+test('暂存：每个方块只能暂存一次；锁定后可再暂存并换回原方块', () => {
+  const g = tt.createGame({ seed: 3 });
+  const first = g.piece.type;
+  const second = g.queue[0];
+  assert.ok(tt.hold(g));
+  assert.deepEqual([g.hold, g.piece.type, g.holdUsed], [first, second, true]);
+  assert.equal(tt.hold(g), false);
+  tt.hardDrop(g);
+  assert.equal(g.holdUsed, false);
+  const third = g.piece.type;
+  assert.ok(tt.hold(g));
+  assert.deepEqual([g.hold, g.piece.type], [third, first]);
+});
+
+test('游戏结束：出生被挡、整块锁在可见区以上算结束；部分伸进隐藏区不算', () => {
+  const g = ttGame([], { type: 'O', x: -1, y: 10 });
+  for (const y of [-2, -1, 0]) for (let x = 3; x <= 6; x++) g.board[(y + tt.BUFFER) * tt.COLS + x] = 1;
+  tt.hardDrop(g);
+  assert.equal(g.status, 'over');
+  assert.equal(ttEvents(g, 'over')[0].reason, 'blockout');
+
+  const full = ttGame(Array(20).fill('#########.'), { type: 'O', x: -1, y: -6 });
+  tt.hardDrop(full);
+  assert.equal(full.status, 'over');
+  assert.equal(ttEvents(full, 'over')[0].reason, 'lockout');
+
+  const partial = ttGame(Array(19).fill('#########.'), { type: 'O', x: -1, y: -5 });
+  tt.hardDrop(partial);
+  assert.ok(ttEvents(partial, 'lock')[0].cells.some(([, y]) => y >= 0));
+  assert.equal(ttEvents(partial, 'over').length, 0, '下面一行进入可见区，不结束');
+});
+
+test('模式：40 行达成即完成并停表；限时 2 分钟到点结束，消行动画中则等动画结束', () => {
+  const s = ttGame(['.#########'], { type: 'I', rot: 1, x: -2, y: 0 }, { mode: 'sprint' });
+  s.lines = 39;
+  s.elapsed = 5000;
+  tt.hardDrop(s);
+  assert.equal(s.status, 'done');
+  tt.tick(s, 1000);
+  assert.equal(s.elapsed, 5000, '完成后不再计时');
+  assert.equal(s.clearing, null, '消行动画仍会播完');
+
+  const u = tt.createGame({ mode: 'ultra', seed: 5 });
+  while (u.status === 'playing') {
+    u.board.fill(0);
+    tt.tick(u, 50);
+  }
+  assert.deepEqual([u.status, u.elapsed], ['done', tt.ULTRA_MS]);
+
+  const uc = ttGame(['.#########'], { type: 'I', rot: 1, x: -2, y: 0 }, { mode: 'ultra' });
+  uc.elapsed = tt.ULTRA_MS - 50;
+  tt.hardDrop(uc);
+  tt.tick(uc, 100);
+  assert.equal(uc.status, 'playing', '动画中到点，先等动画结束');
+  tt.tick(uc, 200);
+  assert.deepEqual([uc.status, uc.lines], ['done', 1]);
+});
+
+test('随机对局 300 局：方块守恒、没有残留满行、得分不减、事件与统计一致', () => {
+  const rng = mulberry32(2026);
+  let totalPieces = 0;
+  for (let n = 0; n < 300; n++) {
+    const g = tt.createGame({ seed: n, mode: tt.MODES[n % 3], startLevel: 1 + (n % 10) });
+    let lines = 0;
+    let lastScore = 0;
+    for (let step = 0; step < 20000 && g.status === 'playing'; step++) {
+      const r = rng();
+      if (r < 0.25) tt.move(g, rng() < 0.5 ? -1 : 1);
+      else if (r < 0.4) tt.rotate(g, rng() < 0.5 ? -1 : 1);
+      else if (r < 0.45) tt.hold(g);
+      else if (r < 0.5) tt.hardDrop(g);
+      else tt.tick(g, TT_STEP, rng() < 0.3);
+      let spawned = false;
+      for (const ev of g.events) {
+        if (ev.type === 'clear') lines += ev.lines;
+        if (ev.type === 'spawn') spawned = true;
+      }
+      g.events.length = 0;
+      assert.ok(g.score >= lastScore);
+      lastScore = g.score;
+      if (spawned) {
+        assert.ok(tt.fits(g, g.piece.type, g.piece.rot, g.piece.x, g.piece.y), '新方块不与场地重叠');
+        for (let y = 0; y < tt.ROWS; y++) assert.notEqual(ttRow(g, y), '##########', '出新方块时没有残留满行');
+      }
+    }
+    assert.equal(lines, g.lines);
+    totalPieces += g.pieces;
+  }
+  assert.ok(totalPieces > 3000);
+});
+
+test('存档还原：还原后继续对局结果完全一致；篡改或不一致的存档被丢弃', () => {
+  const rng = mulberry32(99);
+  const g = tt.createGame({ seed: 123, mode: 'marathon', startLevel: 3 });
+  const actions = [];
+  const act = (game, a) => {
+    if (a === 0) tt.move(game, -1);
+    else if (a === 1) tt.move(game, 1);
+    else if (a === 2) tt.rotate(game, 1);
+    else if (a === 3) tt.hardDrop(game);
+    else if (a === 4) tt.hold(game);
+    else tt.tick(game, TT_STEP);
+  };
+  // 先把方块随机分散地落 60 个，快到顶就清空场地，保证存档时对局还在进行
+  for (let i = 0; i < 60; i++) {
+    const dx = Math.floor(rng() * 9) - 4;
+    for (let k = 0; k < Math.abs(dx); k++) tt.move(g, Math.sign(dx));
+    for (let k = Math.floor(rng() * 4); k > 0; k--) tt.rotate(g, 1);
+    if (rng() < 0.2) tt.hold(g);
+    tt.hardDrop(g);
+    while (g.clearing) tt.tick(g, TT_STEP);
+    if (tt.inDanger(g)) g.board.fill(0);
+  }
+  for (let i = 0; i < 30; i++) act(g, [0, 1, 2, 5][Math.floor(rng() * 4)]);
+  while (g.clearing) tt.tick(g, TT_STEP);
+  assert.equal(g.status, 'playing');
+  assert.ok(g.pieces >= 60 && g.score > 0);
+  const save = JSON.parse(JSON.stringify(tt.serialize(g)));
+  const back = tt.restoreGame(save);
+  assert.deepEqual(tt.serialize(back), tt.serialize(g));
+  for (let i = 0; i < 2000; i++) actions.push(Math.floor(rng() * 7));
+  for (const a of actions) {
+    act(g, a);
+    act(back, a);
+  }
+  assert.deepEqual(tt.serialize(back), tt.serialize(g), '确定性：同样的操作得到同样的局面');
+
+  assert.equal(tt.restoreGame(null), null);
+  assert.equal(tt.restoreGame({ ...save, v: 0 }), null);
+  assert.equal(tt.restoreGame({ ...save, mode: 'zen' }), null);
+  assert.equal(tt.restoreGame({ ...save, board: save.board.replace('0', '9') }), null);
+  assert.equal(tt.restoreGame({ ...save, queue: 'IOX' }), null);
+  assert.equal(tt.restoreGame({ ...save, level: 1 }), null, '等级低于起始等级');
+  assert.equal(tt.restoreGame({ ...save, score: -1 }), null);
+  const blocked = save.board.split('');
+  blocked.fill('1', (save.piece.y + tt.BUFFER) * tt.COLS, (save.piece.y + tt.BUFFER + 4) * tt.COLS);
+  assert.equal(tt.restoreGame({ ...save, board: blocked.join('') }), null, '当前方块与场地重叠');
+  assert.equal(tt.restoreGame({ ...save, piece: null, clearing: { rows: [19], t: 0 } }), null, '消行的行没填满');
 });
 
 console.log(`\n全部 ${passed} 项通过`);

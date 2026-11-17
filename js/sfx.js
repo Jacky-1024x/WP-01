@@ -1,5 +1,6 @@
 // 通用音效：用 Web Audio 实时合成，无需音频文件，离线可用、零加载延迟。
 // 用法：import { play } from '../../js/sfx.js'; play('place');
+//   可选参数：play(名称, 延迟秒数, { volume: 0–1, pitch: 音调倍数 })
 // 页面中的 button / a 会自动播放点击音效：
 //   data-sfx="名称" 指定其他音效，data-sfx="none" 不播放；带 aria-pressed 的按钮默认用 select。
 // 带 data-sound-toggle 的按钮会成为音效开关。
@@ -7,6 +8,7 @@
 // 可用音效：
 //   界面：tap（按钮点击） select（切换/选择） error（无效操作）
 //   游戏：move（滑动/移动） place（落子/放置） card（发牌/翻牌） chip（筹码/金币）
+//         clear（消除，pitch 越高音调越高） tetris（大消除）
 //   结果：win（胜利） lose（失败） draw（平局）
 
 const MUTE_KEY = 'h5.sfx.muted';
@@ -14,6 +16,7 @@ const MASTER_VOLUME = 0.6;
 
 let ctx = null;
 let master = null;
+let out = null; // 当前音效的输出节点：默认 master，带音量参数时为临时增益节点
 let noiseBuffer = null;
 let muted = readMuted();
 const lastPlayed = new Map();
@@ -56,7 +59,7 @@ function tone(t, freq, dur, { type = 'sine', gain = 0.2, to, attack = 0.004 } = 
   osc.frequency.setValueAtTime(freq, t);
   if (to) osc.frequency.exponentialRampToValueAtTime(to, t + dur);
   const g = envelope(t, dur, gain, attack);
-  osc.connect(g).connect(master);
+  osc.connect(g).connect(out);
   osc.start(t);
   osc.stop(t + dur + 0.02);
 }
@@ -70,7 +73,7 @@ function noise(t, dur, { filter = 'bandpass', freq = 2000, to, q = 1, gain = 0.2
   f.frequency.setValueAtTime(freq, t);
   if (to) f.frequency.exponentialRampToValueAtTime(to, t + dur);
   const g = envelope(t, dur, gain, attack);
-  src.connect(f).connect(g).connect(master);
+  src.connect(f).connect(g).connect(out);
   src.start(t, Math.random() * 0.3);
   src.stop(t + dur + 0.02);
 }
@@ -125,16 +128,32 @@ const SOUNDS = {
   draw(t) {
     notes(t, [523, 523], 0.14, 0.2, { type: 'triangle', gain: 0.15 });
   },
+  clear(t, { pitch = 1 }) {
+    notes(t, [523 * pitch, 784 * pitch, 1047 * pitch], 0.05, 0.22, { type: 'triangle', gain: 0.15 });
+    noise(t, 0.16, { freq: 2500, to: 7000, q: 0.7, gain: 0.08 });
+  },
+  tetris(t) {
+    notes(t, [523, 659, 784, 1047, 1319], 0.055, 0.45, { type: 'square', gain: 0.06 });
+    notes(t, [262, 330, 392, 523], 0.055, 0.4, { type: 'triangle', gain: 0.12 });
+    noise(t, 0.3, { freq: 1500, to: 8000, q: 0.6, gain: 0.1 });
+  },
 };
 
-export function play(name, delay = 0) {
+export function play(name, delay = 0, { volume = 1, pitch = 1 } = {}) {
   if (muted || !ctx || !SOUNDS[name]) return;
   if (ctx.state !== 'running') ctx.resume().catch(() => {});
   // 同一音效 25ms 内只播一次，避免叠音爆音
   const now = performance.now() + delay * 1000;
   if (now - (lastPlayed.get(name) ?? -1e9) < 25) return;
   lastPlayed.set(name, now);
-  SOUNDS[name](ctx.currentTime + 0.005 + delay);
+  out = master;
+  if (volume !== 1) {
+    out = ctx.createGain();
+    out.gain.value = volume;
+    out.connect(master);
+  }
+  SOUNDS[name](ctx.currentTime + 0.005 + delay, { pitch });
+  out = master;
 }
 
 export const isMuted = () => muted;
