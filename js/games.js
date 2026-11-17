@@ -38,4 +38,13 @@ self.H5_GAMES = [
     tags: ['麻将', '人机'],
     files: ['index.html', 'mahjong.css', 'mahjong.js', 'engine.js', 'ai.js', 'tiles.js'],
   },
+  {
+    id: 'codelights',
+    name: '密码灯',
+    desc: '猜出 4 盏灯的颜色和顺序，4–7 种颜色可选，7 次机会，简单 / 进阶两种提示。',
+    path: 'games/codelights/',
+    icon: 'icons/codelights.svg',
+    tags: ['益智', '推理'],
+    files: ['index.html', 'codelights.css', 'codelights.js', 'engine.js'],
+  },
 ];

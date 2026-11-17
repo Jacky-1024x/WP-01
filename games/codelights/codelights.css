@@ -1,0 +1,372 @@
+/* 重新开始按钮放在左侧，两侧各两个按钮，标题无需补宽即可居中 */
+.topbar:has(#restartBtn) h1 {
+  padding-left: 0;
+}
+
+.controls-top {
+  display: flex;
+  gap: 8px;
+  padding: 4px 16px 0;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+#modeSelect {
+  flex: 2;
+}
+
+#colorSelect {
+  flex: 3;
+}
+
+.controls-top .segmented button {
+  padding: 0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+}
+
+/* 棋盘内所有尺寸都以主灯边长 --s 为基准，--s 由脚本按可用空间计算 */
+.board {
+  --s: 36px;
+  --row-gap: calc(var(--s) * 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: var(--row-gap);
+  padding: calc(var(--s) * 0.25);
+  border-radius: calc(var(--s) * 0.45);
+  background: #111827;
+  box-shadow: 0 0 0 1px var(--border);
+  color: #9ca3af;
+  transition: opacity 0.2s ease;
+}
+
+.board[data-mode="advanced"] {
+  --row-gap: calc(var(--s) * 0.3);
+}
+
+.board.switching {
+  opacity: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: calc(var(--s) * 0.1) calc(var(--s) * 0.15);
+  border-radius: calc(var(--s) * 0.25);
+  border: 1.5px solid transparent;
+}
+
+.row.future {
+  opacity: 0.4;
+}
+
+.row.active {
+  background: rgba(79, 70, 229, 0.22);
+  border-color: #818cf8;
+}
+
+.row-num {
+  width: calc(var(--s) * 0.45);
+  flex-shrink: 0;
+  font-size: max(11px, calc(var(--s) * 0.3));
+  font-variant-numeric: tabular-nums;
+}
+
+/* 简单模式下右侧没有圆点，用等宽占位让主灯区居中 */
+.board[data-mode="simple"] .row::after {
+  content: "";
+  width: calc(var(--s) * 0.45);
+  flex-shrink: 0;
+}
+
+.lights {
+  display: flex;
+  gap: calc(var(--s) * 0.3);
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--s) * 0.1);
+  width: var(--s);
+}
+
+.row.active .slot {
+  cursor: pointer;
+}
+
+.light {
+  --c: #1f2937;
+  position: relative;
+  width: var(--s);
+  height: var(--s);
+  border-radius: calc(var(--s) * 0.16);
+  background: var(--c);
+  border: 1.5px dashed #4b5563;
+  outline: 2.5px solid transparent;
+  outline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.light[data-color] {
+  border-color: transparent;
+  box-shadow: 0 0 calc(var(--s) * 0.22) color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+/* 灯面高光 */
+.light[data-color]::after {
+  content: "";
+  position: absolute;
+  left: 14%;
+  top: 12%;
+  width: 38%;
+  height: 14%;
+  border-radius: 99px;
+  background: #fff;
+  opacity: 0.35;
+}
+
+.light[data-color="R"] { --c: #ef4444; }
+.light[data-color="O"] { --c: #fb923c; }
+.light[data-color="Y"] { --c: #facc15; }
+.light[data-color="C"] { --c: #22d3ee; }
+.light[data-color="B"] { --c: #3b82f6; }
+.light[data-color="P"] { --c: #a855f7; }
+.light[data-color="M"] { --c: #f472b6; }
+
+.slot.selected .light {
+  outline-color: #fff;
+}
+
+/* 撞色提醒：确认后这盏灯会熄灭 */
+.slot.warn .light {
+  outline: 2px dashed #fff;
+  animation: warn-blink 0.8s ease-in-out infinite;
+}
+
+@keyframes warn-blink {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.75; }
+}
+
+.light.pop {
+  animation: pop 0.14s ease-out;
+}
+
+@keyframes pop {
+  50% { transform: scale(1.08); }
+}
+
+.light.out {
+  animation: out 0.25s ease-out;
+}
+
+@keyframes out {
+  from { background: rgba(255, 255, 255, 0.35); }
+}
+
+.bar {
+  height: calc(var(--s) * 0.25);
+  border-radius: 99px;
+  background: #374151;
+}
+
+.board[data-mode="advanced"] .bar {
+  display: none;
+}
+
+.pegs {
+  display: grid;
+  grid-template-columns: repeat(2, calc(var(--s) * 0.3));
+  gap: calc(var(--s) * 0.15);
+  margin-left: calc(var(--s) * 0.3);
+  padding-left: calc(var(--s) * 0.3);
+  border-left: 1px solid #374151;
+}
+
+.board[data-mode="simple"] .pegs {
+  display: none;
+}
+
+.pegs i {
+  width: calc(var(--s) * 0.3);
+  height: calc(var(--s) * 0.3);
+  border-radius: 50%;
+  background: #374151;
+}
+
+.bar[data-fb="G"],
+.pegs i[data-fb="G"] {
+  background: #22c55e;
+  box-shadow: 0 0 calc(var(--s) * 0.15) rgba(34, 197, 94, 0.7);
+}
+
+.bar[data-fb="W"],
+.pegs i[data-fb="W"] {
+  background: #f8fafc;
+  box-shadow: 0 0 calc(var(--s) * 0.15) rgba(248, 250, 252, 0.6);
+}
+
+.bar[data-fb],
+.pegs i[data-fb] {
+  animation: fb-in 0.2s ease-out;
+}
+
+@keyframes fb-in {
+  from { transform: scale(0.6); opacity: 0.3; }
+}
+
+.row.shake {
+  animation: shake 0.32s ease;
+}
+
+@keyframes shake {
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.row.win .light {
+  animation: win-blink 0.3s ease-in-out 2;
+}
+
+@keyframes win-blink {
+  50% { filter: brightness(1.6); transform: scale(1.06); }
+}
+
+/* 底部控制区 */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 4px 16px calc(var(--safe-bottom) + 14px);
+}
+
+.controls-row {
+  display: flex;
+  gap: 10px;
+}
+
+.ctrl-btn {
+  flex: 1;
+  min-height: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--text) 8%, var(--bg));
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.ctrl-btn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.4;
+}
+
+.ctrl-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ctrl-label svg {
+  width: 16px;
+  height: 16px;
+}
+
+.slot-marks,
+.color-marks {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 14px;
+}
+
+.slot-marks i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text) 25%, transparent);
+}
+
+.slot-marks i.on {
+  background: var(--text);
+}
+
+.color-marks i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+.color-marks i.on {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--text);
+}
+
+.ok-btn {
+  width: 100%;
+  min-height: 50px;
+  font-size: 18px;
+}
+
+.ok-btn[aria-disabled="true"] {
+  background: color-mix(in srgb, var(--text) 16%, var(--bg));
+  color: var(--text-dim);
+  box-shadow: none;
+}
+
+/* 结果弹窗中的答案 */
+.answer {
+  --s: 44px;
+  display: inline-flex;
+  gap: calc(var(--s) * 0.25);
+  margin: 12px 0 4px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #111827;
+}
+
+.answer .light {
+  animation: reveal 0.3s ease-out backwards;
+}
+
+@keyframes reveal {
+  from { transform: rotateY(90deg); opacity: 0; }
+}
+
+.result-stats {
+  font-size: 13px;
+}
+
+.help .fb-g {
+  color: #16a34a;
+}
+
+.help .fb-w {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: #111827;
+  color: #f8fafc;
+}

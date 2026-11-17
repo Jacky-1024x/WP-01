@@ -5,6 +5,7 @@ import { chooseMove, findWinLine, shapeAt, SHAPE, BLACK, WHITE, SIZE } from '../
 import * as bj from '../games/blackjack/engine.js';
 import * as mj from '../games/mahjong/engine.js';
 import { chooseClaim, chooseSelfAction, shanten } from '../games/mahjong/ai.js';
+import * as cl from '../games/codelights/engine.js';
 
 let passed = 0;
 function test(name, fn) {
@@ -623,6 +624,190 @@ test('随机对局能打完，牌数和分数都守恒', () => {
     assert.equal(state.pool.length, state.players.reduce((sum, player) => sum + player.discards.length, 0));
     assert.equal(state.players.reduce((sum, player) => sum + player.score, 0), 0);
   }
+});
+
+console.log('密码灯');
+
+// 直接指定答案的对局，避免随机性
+function lightsGame(answer, mode = 'simple', colors = 7) {
+  const g = cl.createGame(mode, Math.random, null, colors);
+  g.answer = [...answer];
+  return g;
+}
+
+// 用「换色」把选中的灯循环到指定颜色
+function cycleTo(g, c) {
+  while (g.current[g.cursor] !== c) cl.cycleColor(g);
+}
+
+// 依次换色并按「下一盏」，填满整行
+function fillRow(g, colors) {
+  colors.forEach((c) => {
+    cycleTo(g, c);
+    cl.nextSlot(g);
+  });
+}
+
+test('答案从 7 色中取 4 个不重复颜色，且分布大致均匀', () => {
+  const rng = mulberry32(3);
+  const firstSlot = {};
+  for (let i = 0; i < 7000; i++) {
+    const a = cl.makeAnswer(rng);
+    assert.equal(a.length, 4);
+    assert.equal(new Set(a).size, 4);
+    assert.ok(a.every((c) => cl.COLORS.includes(c)));
+    firstSlot[a[0]] = (firstSlot[a[0]] || 0) + 1;
+  }
+  for (const c of cl.COLORS) assert.ok(firstSlot[c] > 850 && firstSlot[c] < 1150, `${c}: ${firstSlot[c]}`);
+});
+
+test('判定：绿 / 白 / 黑与进阶圆点排序', () => {
+  const answer = ['B', 'R', 'P', 'Y'];
+  assert.deepEqual(cl.evaluate(answer, ['R', 'O', 'Y', 'C']).result, ['W', 'K', 'W', 'K']);
+  const r = cl.evaluate(answer, ['Y', 'R', 'B', 'M']);
+  assert.deepEqual(r.result, ['W', 'G', 'W', 'K']);
+  assert.equal(r.green, 1);
+  assert.equal(r.white, 2);
+  assert.deepEqual(cl.pegs(r.result), ['G', 'W', 'W', 'K']);
+  assert.deepEqual(cl.evaluate(answer, answer).result, ['G', 'G', 'G', 'G']);
+});
+
+test('换色在 7 色间循环；下一盏从第 4 盏回到第 1 盏；点击选中', () => {
+  const g = lightsGame(['B', 'R', 'P', 'Y']);
+  const seen = [];
+  for (let i = 0; i < 8; i++) seen.push(cl.cycleColor(g));
+  assert.deepEqual(seen, [...cl.COLORS, 'R']);
+  for (let i = 0; i < 4; i++) cl.nextSlot(g);
+  assert.equal(g.cursor, 0);
+  assert.deepEqual(cl.selectSlot(g, 2), { cleared: -1 });
+  assert.equal(g.cursor, 2);
+  assert.equal(cl.selectSlot(g, 2), null, '点击已选中的灯无反应');
+});
+
+test('换色位置全局延续：熄灭的灯接着上一次的颜色往下换，已亮的灯从自身颜色往下换', () => {
+  const g = lightsGame(['B', 'R', 'P', 'Y']);
+  cycleTo(g, 'B');
+  cl.nextSlot(g);
+  assert.equal(cl.cycleColor(g), 'P', '新的一盏从蓝的下一个开始');
+  cl.selectSlot(g, 0);
+  assert.equal(cl.cycleColor(g), 'P', '已亮的蓝灯换到紫（确认时与第 2 盏互斥）');
+
+  fillRow(g, ['R', 'O', 'Y', 'C']);
+  cl.submit(g);
+  assert.equal(g.lastColor, 'C');
+  assert.equal(cl.cycleColor(g), 'B', '换到新的一行仍接着往下');
+
+  const next = cl.createGame('simple', Math.random, g.lastColor);
+  assert.equal(cl.cycleColor(next), 'P', '新的一局也延续');
+  const back = cl.restoreGame(JSON.parse(JSON.stringify(next)));
+  assert.equal(back.lastColor, 'P', '存档保留换色位置');
+});
+
+test('颜色数量：默认 4 色，可选 4–7 色；出题、换色、存档都只用本局的颜色', () => {
+  const g = cl.createGame('simple', Math.random);
+  assert.equal(g.colors, 4);
+  assert.deepEqual([...g.answer].sort(), ['B', 'P', 'R', 'Y']);
+  const seen = [];
+  for (let i = 0; i < 5; i++) seen.push(cl.cycleColor(g));
+  assert.deepEqual(seen, ['R', 'Y', 'B', 'P', 'R']);
+
+  for (const n of cl.COLOR_COUNTS) {
+    const colors = cl.palette(n);
+    assert.equal(colors.length, n);
+    assert.equal(cl.createGame('advanced', Math.random, null, n).colors, n);
+    for (let i = 0; i < 200; i++) assert.ok(cl.makeAnswer(Math.random, colors).every((c) => colors.includes(c)));
+  }
+  assert.equal(cl.createGame('simple', Math.random, null, 3).colors, 4, '非法数量回到默认');
+
+  const g5 = cl.createGame('simple', Math.random, 'C', 4);
+  assert.equal(cl.cycleColor(g5), 'B', '全局位置不在本局颜色里时，接着往下找本局有的颜色');
+
+  const save = JSON.parse(JSON.stringify(g));
+  assert.equal(cl.restoreGame(save).colors, 4);
+  assert.equal(cl.restoreGame({ ...save, answer: ['R', 'O', 'B', 'P'] }), null, '答案含本局没有的颜色');
+  assert.equal(cl.restoreGame({ ...save, colors: 3 }), null);
+  const { colors: _, ...old } = save;
+  assert.equal(cl.restoreGame({ ...old, answer: ['R', 'O', 'B', 'P'] }).colors, 7, '旧存档按 7 色还原');
+});
+
+test('颜色互斥：换色时只提醒，确认（下一盏 / 点击 / 确定）时才熄灭撞色的灯', () => {
+  const g = lightsGame(['B', 'R', 'P', 'Y']);
+  fillRow(g, ['R']);
+  cycleTo(g, 'R'); // 第 2 盏预选红，与第 1 盏撞色
+  assert.equal(cl.conflictIndex(g), 0);
+  assert.equal(g.current[0], 'R', '预选阶段不熄灭');
+  cl.cycleColor(g); // 换到橙，冲突消失
+  assert.equal(cl.conflictIndex(g), -1);
+  cycleTo(g, 'R');
+  assert.deepEqual(cl.nextSlot(g), { cleared: 0 });
+  assert.deepEqual(g.current, [null, 'R', null, null]);
+
+  cycleTo(g, 'R'); // 第 3 盏预选红，点击第 4 盏确认
+  assert.deepEqual(cl.selectSlot(g, 3), { cleared: 1 });
+  assert.deepEqual(g.current, [null, null, 'R', null]);
+});
+
+test('4 盏全亮才能提交；撞色时按确定先熄灭再拒绝提交', () => {
+  const g = lightsGame(['B', 'R', 'P', 'Y']);
+  fillRow(g, ['R', 'O', 'Y']);
+  assert.equal(cl.allLit(g), false);
+  assert.equal(cl.submit(g).ok, false);
+  assert.equal(g.rows.length, 0);
+
+  cl.selectSlot(g, 3);
+  cycleTo(g, 'R'); // 第 4 盏预选红，与第 1 盏撞色
+  assert.equal(cl.allLit(g), true);
+  const res = cl.submit(g);
+  assert.equal(res.ok, false);
+  assert.equal(res.cleared, 0);
+  assert.equal(g.rows.length, 0);
+  assert.deepEqual(g.current, [null, 'O', 'Y', 'R']);
+});
+
+test('确认不可逆：逐行推进，重复猜测照常消耗一行，第 7 行仍不对即失败', () => {
+  const g = lightsGame(['B', 'R', 'P', 'Y'], 'advanced');
+  for (let i = 0; i < cl.ROWS; i++) {
+    fillRow(g, ['R', 'O', 'Y', 'C']);
+    const res = cl.submit(g);
+    assert.equal(res.ok, true);
+    assert.equal(g.rows.length, i + 1);
+    assert.deepEqual(g.current, [null, null, null, null]);
+    assert.equal(g.cursor, 0);
+  }
+  assert.equal(g.status, 'lost');
+  assert.equal(cl.submit(g).ok, false);
+  assert.equal(cl.cycleColor(g), null);
+  assert.equal(cl.nextSlot(g), null);
+  assert.equal(g.rows.length, cl.ROWS);
+});
+
+test('猜中即胜利，之后不再接受输入', () => {
+  const g = lightsGame(['B', 'R', 'P', 'Y']);
+  fillRow(g, ['Y', 'R', 'B', 'M']);
+  cl.submit(g);
+  fillRow(g, ['B', 'R', 'P', 'Y']);
+  const res = cl.submit(g);
+  assert.equal(res.status, 'won');
+  assert.equal(g.rows.length, 2);
+  assert.equal(cl.cycleColor(g), null);
+});
+
+test('存档还原：合法存档原样恢复，篡改或不一致的存档被丢弃', () => {
+  const g = lightsGame(['B', 'R', 'P', 'Y'], 'advanced');
+  fillRow(g, ['Y', 'R', 'B', 'M']);
+  cl.submit(g);
+  cl.cycleColor(g);
+  const save = JSON.parse(JSON.stringify({ ...g, rows: g.rows.map((r) => ({ guess: r.guess })) }));
+  const back = cl.restoreGame(save);
+  assert.deepEqual(back.rows, g.rows);
+  assert.deepEqual(back.current, g.current);
+  assert.equal(back.status, 'playing');
+
+  assert.equal(cl.restoreGame(null), null);
+  assert.equal(cl.restoreGame({ ...save, answer: ['B', 'B', 'P', 'Y'] }), null);
+  assert.equal(cl.restoreGame({ ...save, rows: [{ guess: ['R', 'R', 'O', 'Y'] }] }), null);
+  assert.equal(cl.restoreGame({ ...save, status: 'won' }), null);
+  assert.equal(cl.restoreGame({ ...save, rows: [{ guess: ['B', 'R', 'P', 'Y'] }, ...save.rows] }), null, '胜利后不能还有行');
 });
 
 console.log(`\n全部 ${passed} 项通过`);
