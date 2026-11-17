@@ -10,6 +10,7 @@
 | --- | --- |
 | 数字华容道 | 3×3 ~ 6×6 四档难度；打乱时从完成状态随机合法移动，保证必定可解；首次移动开始计时、计步；按难度记录最短用时与最少步数；支持点击（整排推动）与滑动手势 |
 | 五子棋 | 15×15 人机对战（自由五子棋，无禁手）；简单 / 普通 / 困难三档 AI；可选执黑先手或执白后手；悔棋、重新开始、获胜连线高亮、最后一手标记、防误触的「确认落子」模式；对局自动保存 |
+| 21 点 | 6 副牌，庄家软 17 停牌，Blackjack 赔 3:2；支持加倍、分牌（最多 4 手，分 A 只补一张）；庄家明牌为 A / 10 点时先查暗牌；筹码与牌局自动保存，输光可领取救济筹码；记录战绩与最高筹码 |
 
 ## 项目结构
 
@@ -31,15 +32,20 @@ H5-Game/
 │   │   ├── klotski.css
 │   │   ├── klotski.js      # 界面与交互
 │   │   └── puzzle.js       # 纯逻辑（打乱、可解性校验、移动）
-│   └── gomoku/             # 五子棋
+│   ├── gomoku/             # 五子棋
+│   │   ├── index.html
+│   │   ├── gomoku.css
+│   │   ├── gomoku.js       # 界面、canvas 绘制、对局流程
+│   │   ├── ai.js           # AI 纯逻辑
+│   │   └── ai-worker.js    # 在 Web Worker 中运行 AI，避免卡住界面
+│   └── blackjack/          # 21 点
 │       ├── index.html
-│       ├── gomoku.css
-│       ├── gomoku.js       # 界面、canvas 绘制、对局流程
-│       ├── ai.js           # AI 纯逻辑
-│       └── ai-worker.js    # 在 Web Worker 中运行 AI，避免卡住界面
+│       ├── blackjack.css
+│       ├── blackjack.js    # 界面、下注与发牌动画
+│       └── engine.js       # 纯逻辑（牌靴、点数、要牌/停牌/加倍/分牌、结算）
 ├── icons/                  # SVG 源图标与生成的 PNG（180 / 192 / 512）
 ├── scripts/gen-icons.sh    # 从 icons/icon.svg 生成 PNG 图标
-├── tests/smoke.mjs         # 冒烟测试（华容道可解性、五子棋 AI）
+├── tests/smoke.mjs         # 冒烟测试（华容道可解性、五子棋 AI、21 点规则与结算）
 └── package.json            # 仅用于声明 ES module 与快捷脚本，无任何依赖
 ```
 

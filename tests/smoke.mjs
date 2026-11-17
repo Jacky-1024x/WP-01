@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { createSolved, isSolved, isSolvable, shuffle, moveAt, moveDirection } from '../games/klotski/puzzle.js';
 import { chooseMove, findWinLine, shapeAt, SHAPE, BLACK, WHITE, SIZE } from '../games/gomoku/ai.js';
+import * as bj from '../games/blackjack/engine.js';
 
 let passed = 0;
 function test(name, fn) {
@@ -286,6 +287,147 @@ test('自对弈：困难 vs 普通 2 局可正常终局', () => {
     console.log(`    第 ${i + 1} 局：${r.winner === BLACK ? '黑胜' : r.winner === WHITE ? '白胜' : '平局'}（黑=${i ? '普通' : '困难'}），${r.plies} 手，单步最长 ${r.maxMs}ms`);
     assert.ok(r.maxMs <= 2500);
   }
+});
+
+console.log('21 点');
+
+// 牌面写法：'A' '2'..'10' 'J' 'Q' 'K'，花色统一取黑桃
+const card = (r) => ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'].indexOf(r);
+// 让接下来依次发出的牌为 cards（发牌顺序：玩家、庄家、玩家、庄家暗牌，之后按需补牌）
+function rigged(cards, bankroll = 1000) {
+  const g = bj.createGame(bankroll, mulberry32(1));
+  g.shoe = [...g.shoe.slice(0, 200), ...cards.map(card).reverse()];
+  return g;
+}
+
+test('点数计算：A 的软硬、J/Q/K、Blackjack 判定', () => {
+  const v = (...rs) => bj.handValue(rs.map(card));
+  assert.deepEqual(v('A', 'K'), { total: 21, soft: true });
+  assert.deepEqual(v('A', 'A', '9'), { total: 21, soft: true });
+  assert.deepEqual(v('A', '5', 'K'), { total: 16, soft: false });
+  assert.deepEqual(v('A', '6'), { total: 17, soft: true });
+  assert.deepEqual(v('Q', 'J', '2'), { total: 22, soft: false });
+  assert.ok(bj.isBlackjack(['A', 'Q'].map(card)));
+  assert.ok(!bj.isBlackjack(['7', '7', '7'].map(card)));
+  assert.ok(!bj.dealerShouldHit(['A', '6'].map(card)), '软 17 停牌');
+  assert.ok(bj.dealerShouldHit(['10', '6'].map(card)));
+});
+
+test('牌靴为 6 副完整的牌', () => {
+  const shoe = bj.createShoe(6, mulberry32(3));
+  assert.equal(shoe.length, 312);
+  const counts = new Array(52).fill(0);
+  for (const c of shoe) counts[c]++;
+  assert.ok(counts.every((n) => n === 6));
+});
+
+test('Blackjack 赔 3:2；庄家 Blackjack 直接结算；双方 Blackjack 平局', () => {
+  let g = bj.deal(rigged(['A', '9', 'K', '7']), 100);
+  assert.equal(g.phase, 'betting');
+  assert.equal(g.hands[0].result, 'blackjack');
+  assert.equal(g.bankroll, 1150);
+
+  g = bj.deal(rigged(['10', 'A', 'Q', 'K']), 100);
+  assert.equal(g.phase, 'betting');
+  assert.equal(g.hands[0].result, 'lose');
+  assert.equal(g.bankroll, 900);
+
+  g = bj.deal(rigged(['A', 'A', 'K', 'Q']), 100);
+  assert.equal(g.hands[0].result, 'push');
+  assert.equal(g.bankroll, 1000);
+});
+
+test('爆牌立即判负且庄家不补牌；庄家按规则补牌', () => {
+  let g = bj.deal(rigged(['10', '10', '6', '6', 'K']), 50);
+  bj.hit(g);
+  assert.equal(g.phase, 'betting');
+  assert.equal(g.hands[0].result, 'bust');
+  assert.equal(g.dealer.length, 2);
+  assert.equal(g.bankroll, 950);
+
+  g = bj.deal(rigged(['10', '10', '8', '6', '5']), 50);
+  bj.stand(g);
+  assert.equal(g.phase, 'dealer');
+  bj.playDealer(g);
+  assert.equal(g.dealer.length, 3);
+  assert.equal(g.hands[0].result, 'lose'); // 18 对 21
+  assert.equal(g.bankroll, 950);
+
+  g = bj.deal(rigged(['10', '10', '8', '6', 'Q']), 50);
+  bj.stand(g);
+  bj.playDealer(g);
+  assert.equal(g.hands[0].result, 'win'); // 庄家 26 爆牌
+  assert.equal(g.bankroll, 1050);
+});
+
+test('加倍：下注翻倍且只补一张', () => {
+  const g = bj.deal(rigged(['6', '10', '5', '7', 'K']), 100);
+  assert.ok(bj.canDouble(g));
+  bj.double(g);
+  assert.equal(g.hands[0].bet, 200);
+  assert.equal(g.hands[0].cards.length, 3);
+  bj.playDealer(g);
+  assert.equal(g.hands[0].result, 'win'); // 21 对 17
+  assert.equal(g.bankroll, 1200);
+});
+
+test('分牌：两手分别结算；分 A 每手只补一张且 21 点按 1:1 赔付', () => {
+  // 8,8 对庄家 10+7：分牌时第二手先补 3、第一手补 10，得到 18 与 11；第二手再要一张 10 成 21
+  let g = bj.deal(rigged(['8', '10', '8', '7', '3', '10', '10']), 100);
+  assert.ok(bj.canSplit(g));
+  bj.split(g);
+  assert.equal(g.hands.length, 2);
+  assert.equal(g.bankroll, 800);
+  assert.equal(g.active, 0);
+  bj.stand(g);
+  assert.equal(g.active, 1);
+  bj.hit(g);
+  assert.equal(g.phase, 'dealer');
+  bj.playDealer(g);
+  assert.deepEqual(g.hands.map((h) => [bj.handValue(h.cards).total, h.result]), [[18, 'win'], [21, 'win']]);
+  assert.equal(g.bankroll, 1200);
+
+  g = bj.deal(rigged(['A', '9', 'A', '8', 'K', 'Q']), 100);
+  bj.split(g);
+  assert.equal(g.phase, 'dealer');
+  assert.ok(g.hands.every((h) => h.cards.length === 2 && h.done));
+  bj.playDealer(g);
+  assert.deepEqual(g.hands.map((h) => h.result), ['win', 'win']);
+  assert.equal(g.bankroll, 1200);
+});
+
+test('筹码不足时不能加倍或分牌', () => {
+  const g = bj.deal(rigged(['8', '10', '8', '7'], 150), 100);
+  assert.ok(!bj.canSplit(g));
+  assert.ok(!bj.canDouble(g));
+});
+
+test('随机对局 3000 局：资金守恒、阶段正确、牌靴自动重洗', () => {
+  const rng = mulberry32(2024);
+  const g = bj.createGame(1_000_000, rng);
+  let reshuffles = 0;
+  for (let i = 0; i < 3000; i++) {
+    const before = g.bankroll;
+    const bet = 10 * (1 + Math.floor(rng() * 20));
+    bj.deal(g, bet, rng);
+    if (g.shuffled) reshuffles++;
+    let guard = 0;
+    while (g.phase === 'player' && guard++ < 50) {
+      const r = rng();
+      if (r < 0.15 && bj.canSplit(g)) bj.split(g);
+      else if (r < 0.3 && bj.canDouble(g)) bj.double(g);
+      else if (bj.handValue(bj.currentHand(g).cards).total < 15) bj.hit(g);
+      else bj.stand(g);
+    }
+    bj.playDealer(g);
+    assert.equal(g.phase, 'betting');
+    assert.ok(g.hands.length >= 1 && g.hands.length <= bj.MAX_HANDS);
+    const staked = g.hands.reduce((s, h) => s + h.bet, 0);
+    const paid = g.hands.reduce((s, h) => s + h.payout, 0);
+    assert.equal(g.bankroll, before - staked + paid);
+    assert.ok(g.hands.every((h) => h.result));
+  }
+  assert.ok(reshuffles > 0);
 });
 
 console.log(`\n全部 ${passed} 项通过`);

@@ -20,4 +20,13 @@ self.H5_GAMES = [
     tags: ['棋类', '人机'],
     files: ['index.html', 'gomoku.css', 'gomoku.js', 'ai.js', 'ai-worker.js'],
   },
+  {
+    id: 'blackjack',
+    name: '21 点',
+    desc: '和庄家比点数，支持加倍、分牌，Blackjack 赔 3:2。',
+    path: 'games/blackjack/',
+    icon: 'icons/blackjack.svg',
+    tags: ['纸牌', '休闲'],
+    files: ['index.html', 'blackjack.css', 'blackjack.js', 'engine.js'],
+  },
 ];
