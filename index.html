@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>H5 游戏合集</title>
+  <meta name="description" content="可离线游玩的 H5 小游戏合集：数字华容道、五子棋">
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/home.css">
+  <script src="js/games.js"></script>
+  <script type="module" src="js/home.js"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="scroll">
+      <header class="hero">
+        <img src="icons/icon.svg" alt="" width="56" height="56">
+        <div>
+          <h1>H5 游戏合集</h1>
+          <p>离线可玩 · 选择一个游戏开始吧</p>
+        </div>
+      </header>
+
+      <div id="installTip" class="install-tip" hidden>
+        在 Safari 中点击底部 <b>分享</b> 按钮，选择 <b>“添加到主屏幕”</b>，即可像 App 一样全屏离线游玩。
+      </div>
+
+      <nav id="gameList" class="game-list" aria-label="游戏列表"></nav>
+
+      <footer class="footer">更多游戏持续更新中…</footer>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "h5-game",
+  "private": true,
+  "description": "H5 游戏合集（PWA），无构建步骤，直接静态部署",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node tests/smoke.mjs",
+    "icons": "bash scripts/gen-icons.sh"
+  }
+}
