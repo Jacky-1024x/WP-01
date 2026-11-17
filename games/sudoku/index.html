@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>数独 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="sudoku.css">
+  <script type="module" src="sudoku.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <button class="icon-btn" id="newBtn" aria-label="新游戏">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8.5v7M8.5 12h7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <h1>数独</h1>
+      <button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>
+      <button class="icon-btn" id="settingsBtn" aria-label="设置">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="17" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="info">
+      <span class="diff-tag" id="diffTag"></span>
+      <span class="errors" id="errorsText"></span>
+      <span class="timer" id="timer">00:00</span>
+      <button class="pause-btn" id="pauseBtn" aria-label="暂停" data-sfx="select">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic-pause" d="M8 6v12M16 6v12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path class="ic-play" d="M8 5.5l11 6.5-11 6.5z" fill="currentColor"/></svg>
+      </button>
+    </div>
+
+    <main class="board-wrap" id="boardWrap">
+      <div class="board-box">
+        <div class="board" id="board" role="grid" aria-label="数独棋盘"></div>
+        <button class="cover" id="pauseCover" hidden data-sfx="select">
+          <span class="cover-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5l11 6.5-11 6.5z" fill="currentColor"/></svg></span>
+          <b>已暂停</b><span>点击继续</span>
+        </button>
+        <div class="cover" id="loadingCover" hidden>
+          <i class="spinner"></i><b>正在出题…</b>
+        </div>
+      </div>
+    </main>
+
+    <div class="dock">
+      <div class="tools">
+        <button class="tool" id="undoBtn" data-sfx="none">
+          <span class="tool-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H6V4M6.5 7.5A7.5 7.5 0 1 1 5 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span>撤销</span>
+        </button>
+        <button class="tool" id="eraseBtn" data-sfx="none">
+          <span class="tool-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M11.5 9.5l5 5m0-5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <span>擦除</span>
+        </button>
+        <button class="tool" id="notesBtn" aria-pressed="false" data-sfx="none">
+          <span class="tool-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-4.5L15.5 5a2.1 2.1 0 0 1 3 3L8 18.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13.5 7l3 3" stroke="currentColor" stroke-width="2"/></svg></span>
+          <span>笔记</span>
+          <em class="badge onoff" id="notesBadge">关</em>
+        </button>
+        <button class="tool" id="hintBtn" data-sfx="none">
+          <span class="tool-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span>提示</span>
+          <em class="badge count" id="hintBadge">3</em>
+        </button>
+      </div>
+      <div class="pad" id="pad"></div>
+
+      <div class="hint-panel" id="hintPanel" hidden>
+        <div class="hint-title" id="hintTitle"></div>
+        <p class="hint-text" id="hintText"></p>
+        <div class="hint-actions">
+          <button class="btn" id="hintClose">知道了</button>
+          <button class="btn primary" id="hintMore">再提示一点</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 难度选择 -->
+  <section class="menu" id="menu" hidden>
+    <header class="topbar">
+      <a class="icon-btn" href="../../" id="menuHome" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <h1>数独</h1>
+      <button class="icon-btn" id="menuClose" aria-label="回到棋盘">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+    <div class="scroll">
+      <div class="menu-body">
+        <h2>选择难度</h2>
+        <p class="menu-sub">每道题都保证只有唯一解，且无需猜测</p>
+        <div class="diff-list" id="diffList"></div>
+        <button class="btn primary big" id="startBtn">开始游戏</button>
+        <button class="btn continue" id="continueBtn" hidden>
+          <span>继续上一局</span>
+          <small id="continueInfo"></small>
+        </button>
+        <button class="link-btn" id="statsBtn">查看统计</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal-card result">
+      <div class="result-emoji">🎉</div>
+      <h2>完成！</h2>
+      <div class="tags" id="resultTags"></div>
+      <dl class="result-rows" id="resultRows"></dl>
+      <div class="actions">
+        <button class="btn" id="resultMenu">换难度</button>
+        <button class="btn primary" id="resultAgain">再来一局</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h2 id="confirmTitle"></h2>
+      <p id="confirmText"></p>
+      <div class="actions">
+        <button class="btn" data-close>取消</button>
+        <button class="btn primary" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal-card settings">
+      <h2>设置</h2>
+      <div class="set-group">
+        <div class="set-label">错误检查</div>
+        <div class="segmented" id="checkSelect" role="group" aria-label="错误检查">
+          <button data-check="instant">即时纠错</button>
+          <button data-check="conflict">只查冲突</button>
+        </div>
+        <p class="set-desc" id="checkDesc"></p>
+      </div>
+      <div class="set-list" id="switchList"></div>
+      <div class="set-actions">
+        <button class="btn" id="autoNotesBtn">自动笔记</button>
+        <button class="btn" id="resetBtn">重做本题</button>
+      </div>
+      <div class="actions"><button class="btn primary" data-close>完成</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="statsModal" hidden>
+    <div class="modal-card stats">
+      <h2>统计</h2>
+      <div class="stats-table" id="statsTable"></div>
+      <p class="set-desc">最佳用时只统计未使用提示的对局；完美通关 = 0 提示且 0 错误。</p>
+      <div class="actions"><button class="btn primary" data-close>关闭</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>玩法说明</h2>
+      <ul>
+        <li>在空格中填入 1–9，使每一行、每一列、每个 3 × 3 宫都恰好包含 1–9 各一次。</li>
+        <li>先点格子，再点下方数字填入；再点一次相同数字可擦除。</li>
+        <li>打开「笔记」后点数字只做标记；长按数字可临时写笔记。长按「笔记」按钮可一键填入全部候选数。</li>
+        <li>「提示」每局 3 次，会先指出方向、再讲方法，最后才给答案。</li>
+        <li>每道题都只有唯一解，而且不需要猜。</li>
+        <li>键盘：方向键移动，1–9 填数，Shift + 数字写笔记，N 笔记，H 提示，Ctrl/⌘ + Z 撤销，空格暂停。</li>
+      </ul>
+      <div class="actions"><button class="btn primary" data-close>知道了</button></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -47,4 +47,13 @@ self.H5_GAMES = [
     tags: ['益智', '推理'],
     files: ['index.html', 'codelights.css', 'codelights.js', 'engine.js'],
   },
+  {
+    id: 'sudoku',
+    name: '数独',
+    desc: '经典 9×9 数独，四档难度，每题唯一解且无需猜测；支持笔记与三级提示。',
+    path: 'games/sudoku/',
+    icon: 'icons/sudoku.svg',
+    tags: ['益智', '逻辑'],
+    files: ['index.html', 'sudoku.css', 'sudoku.js', 'board.js', 'solver.js', 'generator.js', 'puzzles.js', 'worker.js'],
+  },
 ];

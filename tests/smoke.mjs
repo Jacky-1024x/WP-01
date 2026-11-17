@@ -6,6 +6,10 @@ import * as bj from '../games/blackjack/engine.js';
 import * as mj from '../games/mahjong/engine.js';
 import { chooseClaim, chooseSelfAction, shanten } from '../games/mahjong/ai.js';
 import * as cl from '../games/codelights/engine.js';
+import * as sdSolver from '../games/sudoku/solver.js';
+import * as sdGen from '../games/sudoku/generator.js';
+import * as sd from '../games/sudoku/board.js';
+import { BANK as SD_BANK } from '../games/sudoku/puzzles.js';
 
 let passed = 0;
 function test(name, fn) {
@@ -808,6 +812,177 @@ test('存档还原：合法存档原样恢复，篡改或不一致的存档被�
   assert.equal(cl.restoreGame({ ...save, rows: [{ guess: ['R', 'R', 'O', 'Y'] }] }), null);
   assert.equal(cl.restoreGame({ ...save, status: 'won' }), null);
   assert.equal(cl.restoreGame({ ...save, rows: [{ guess: ['B', 'R', 'P', 'Y'] }, ...save.rows] }), null, '胜利后不能还有行');
+});
+
+console.log('数独');
+
+const SD_CLASSIC = [...'530070000600195000098000060800060003400803001700020006060000280000419005000080079'].map(Number);
+const sdValid = (sol) => sdSolver.UNITS.every((u) => new Set(u.map((i) => sol[i])).size === 9 && u.every((i) => sol[i] >= 1));
+const sdGame = () => sd.createGame({ difficulty: 'easy', puzzle: SD_CLASSIC, solution: sdSolver.solve(SD_CLASSIC) });
+
+test('数解：唯一解为 1，挖空过多为 2，矛盾盘面为 0；求解结果合法', () => {
+  assert.equal(sdSolver.countSolutions(SD_CLASSIC), 1);
+  const sol = sdSolver.solve(SD_CLASSIC);
+  assert.ok(sdValid(sol));
+  assert.ok(SD_CLASSIC.every((v, i) => !v || v === sol[i]));
+  assert.equal(sdSolver.countSolutions(new Array(81).fill(0)), 2);
+  const bad = SD_CLASSIC.slice();
+  bad[2] = 5; // 与同行的 5 冲突
+  assert.equal(sdSolver.countSolutions(bad), 0);
+  assert.ok(sdValid(sdSolver.fullGrid(mulberry32(1))));
+});
+
+test('逻辑求解器：经典题只用简单技巧解完；X-Wing 等技巧能被识别', () => {
+  assert.deepEqual(sdSolver.rate(SD_CLASSIC), { solved: true, level: 1 });
+  // 只留数字 1 的两行候选构成 X-Wing：第 1、5 行的 1 都只在第 1、5 列
+  const s = sdSolver.makeState(new Array(81).fill(0));
+  const bit = 1 << 1;
+  for (const r of [0, 4]) for (let c = 0; c < 9; c++) if (c !== 0 && c !== 4) s.c[r * 9 + c] &= ~bit;
+  const xw = sdSolver.TECHNIQUES.find((t) => t.id === 'xWing').fn(s);
+  assert.ok(xw && xw.elims.every(({ i, d }) => d === 1 && (i % 9 === 0 || i % 9 === 4) && ![0, 4].includes((i / 9) | 0)));
+  assert.equal(xw.elims.length, 14);
+});
+
+test('每档生成的题：唯一解、可推理、已知数与最难技巧都符合难度（每档 15 题）', () => {
+  const rng = mulberry32(2026);
+  for (const id of sdGen.DIFF_IDS) {
+    for (let k = 0; k < 15; k++) {
+      const p = sdGen.createPuzzle(id, rng, 3000);
+      assert.equal(p.difficulty, id);
+      assert.ok(sdGen.fitsDifficulty(p.puzzle, id), `${id} 不符合难度`);
+      assert.deepEqual(sdSolver.solve(p.puzzle), p.solution);
+    }
+  }
+});
+
+test('内置题库每道都符合难度；等价变换后仍符合且答案一致', () => {
+  const rng = mulberry32(9);
+  for (const id of sdGen.DIFF_IDS) {
+    assert.ok(SD_BANK[id].length >= 30, `${id} 题库过少`);
+    for (const raw of SD_BANK[id]) assert.ok(sdGen.fitsDifficulty([...raw].map(Number), id), `${id}: ${raw}`);
+    for (let k = 0; k < 10; k++) {
+      const p = sdGen.fromBank(id, rng);
+      assert.ok(sdGen.fitsDifficulty(p.puzzle, id));
+      assert.ok(sdValid(p.solution));
+      assert.deepEqual(sdSolver.solve(p.puzzle), p.solution);
+    }
+  }
+});
+
+test('填数：已知数不可改；相同数字再按为擦除；填错计数；自动清除同行列宫笔记', () => {
+  const g = sdGame();
+  assert.equal(sd.setValue(g, 0, 1), null, '已知数不可改');
+  sd.toggleNote(g, 3, 4); // (0,3) 的笔记 4
+  sd.toggleNote(g, 11, 4); // (1,2) 同宫
+  sd.toggleNote(g, 72, 4); // (8,0) 无关
+  const res = sd.setValue(g, 2, 4); // (0,2) 答案是 4
+  assert.equal(res.wrong, false);
+  assert.deepEqual(res.cleared.sort((a, b) => a - b), [3, 11]);
+  assert.equal(g.notes[3], 0);
+  assert.equal(g.notes[72], 1 << 4);
+  assert.equal(sd.setValue(g, 2, 4).type, 'erase');
+  assert.equal(g.values[2], 0);
+  sd.setValue(g, 2, 9);
+  assert.equal(g.errors, 1);
+  sd.setValue(g, 2, 8, { countErrors: false });
+  assert.equal(g.errors, 1);
+});
+
+test('笔记：有数字的格不能写；擦数字后笔记恢复；撤销连带恢复被自动清除的笔记；重做', () => {
+  const g = sdGame();
+  sd.toggleNote(g, 2, 1);
+  sd.toggleNote(g, 2, 4);
+  sd.toggleNote(g, 3, 4);
+  sd.setValue(g, 2, 4);
+  assert.equal(sd.toggleNote(g, 2, 7), null);
+  sd.erase(g, 2);
+  assert.equal(g.notes[2], (1 << 1) | (1 << 4), '擦除数字后原笔记恢复');
+  sd.erase(g, 2);
+  assert.equal(g.notes[2], 0, '再擦除清空笔记');
+  sd.undo(g);
+  sd.undo(g);
+  assert.equal(g.values[2], 4);
+  sd.undo(g);
+  assert.equal(g.values[2], 0);
+  assert.equal(g.notes[3], 1 << 4, '撤销恢复被自动清除的笔记');
+  sd.redo(g);
+  assert.equal(g.values[2], 4);
+  assert.equal(g.notes[3], 0);
+});
+
+test('自动笔记写入合法候选；冲突检测；数字计数', () => {
+  const g = sdGame();
+  sd.autoNotes(g);
+  for (let i = 0; i < 81; i++) {
+    if (SD_CLASSIC[i]) continue;
+    assert.equal(g.notes[i], sdSolver.candidatesOf(SD_CLASSIC, i));
+    assert.ok(g.notes[i] & (1 << g.solution[i]));
+  }
+  sd.setValue(g, 2, 5); // 与 (0,0) 的 5 同行冲突
+  assert.deepEqual([...sd.conflicts(g)].sort((a, b) => a - b), [0, 2]);
+  assert.equal(sd.placedCount(g, 5, false), SD_CLASSIC.filter((v) => v === 5).length - 1);
+  sd.undo(g);
+  assert.equal(sd.conflicts(g).size, 0);
+});
+
+test('提示优先级：先指出填错，再指出笔记漏数，否则给出正确的下一步；只靠提示能解完（每档 3 题）', () => {
+  const g = sdGame();
+  sd.setValue(g, 2, 9);
+  assert.deepEqual(sd.pickHint(g), { kind: 'wrong', cell: 2 });
+  sd.erase(g, 2);
+  sd.toggleNote(g, 2, 1);
+  assert.deepEqual(sd.pickHint(g), { kind: 'note', cell: 2 });
+  sd.erase(g, 2);
+
+  const rng = mulberry32(5);
+  for (const id of sdGen.DIFF_IDS) {
+    for (let k = 0; k < 3; k++) {
+      const p = sdGen.fromBank(id, rng);
+      const gg = sd.createGame({ difficulty: id, ...p });
+      let steps = 0;
+      while (gg.status === 'playing') {
+        const h = sd.pickHint(gg);
+        assert.equal(h.kind, 'step', '可推理的题不应走到兜底');
+        assert.equal(h.digit, gg.solution[h.cell]);
+        assert.equal(sd.valueAt(gg, h.cell), 0);
+        sd.setValue(gg, h.cell, h.digit);
+        steps++;
+      }
+      assert.equal(steps, p.puzzle.filter((v) => !v).length);
+      assert.equal(gg.errors, 0);
+    }
+  }
+  const h = sd.createGame({ difficulty: 'easy', puzzle: SD_CLASSIC, solution: sdSolver.solve(SD_CLASSIC) });
+  for (let k = 0; k < 3; k++) assert.ok(sd.useHint(h));
+  assert.equal(sd.useHint(h), false, '每局 3 次');
+  assert.equal(h.hintsUsed, 3);
+});
+
+test('填满且全对即胜利；之后不再接受输入', () => {
+  const g = sdGame();
+  for (let i = 0; i < 81; i++) if (!SD_CLASSIC[i]) sd.setValue(g, i, g.solution[i]);
+  assert.equal(g.status, 'won');
+  assert.equal(sd.setValue(g, 2, 1), null);
+  assert.equal(sd.undo(g), null);
+});
+
+test('存档还原：合法存档原样恢复，篡改或不一致的存档被丢弃', () => {
+  const g = sdGame();
+  sd.setValue(g, 2, 4);
+  sd.toggleNote(g, 3, 6);
+  g.elapsed = 12345;
+  const save = JSON.parse(JSON.stringify(g));
+  const back = sd.restoreGame(save);
+  assert.deepEqual(back, g);
+  assert.equal(sd.restoreGame(null), null);
+  assert.equal(sd.restoreGame({ ...save, difficulty: 'nightmare' }), null);
+  assert.equal(sd.restoreGame({ ...save, values: save.values.map((v, i) => (i === 0 ? 3 : v)) }), null, '已知数格不能有填入');
+  const badSol = save.solution.slice();
+  [badSol[0], badSol[1]] = [badSol[1], badSol[0]];
+  assert.equal(sd.restoreGame({ ...save, solution: badSol }), null);
+  assert.equal(sd.restoreGame({ ...save, hintsLeft: 9 }), null);
+  assert.equal(sd.restoreGame({ ...save, notes: save.notes.map(() => 1 << 12) }), null);
+  assert.deepEqual(sd.restoreGame({ ...save, undo: [[{ i: 99 }]] }).undo, [], '撤销栈异常时清空');
 });
 
 console.log(`\n全部 ${passed} 项通过`);

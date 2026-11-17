@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#0ea5e9"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="22" fill="url(#g)"/>
+  <rect x="15" y="15" width="66" height="66" rx="8" fill="#ffffff"/>
+  <rect x="37" y="15" width="22" height="66" fill="#eef2ff"/>
+  <rect x="15" y="37" width="66" height="22" fill="#eef2ff"/>
+  <rect x="37" y="37" width="22" height="22" fill="#c7d2fe"/>
+  <path d="M37 15v66M59 15v66M15 37h66M15 59h66" stroke="#111827" stroke-width="2.5"/>
+  <rect x="15" y="15" width="66" height="66" rx="8" fill="none" stroke="#111827" stroke-width="3"/>
+  <g font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="16" text-anchor="middle">
+    <text x="26" y="32" fill="#111827">5</text>
+    <text x="70" y="32" fill="#111827">3</text>
+    <text x="48" y="54" fill="#4f46e5">7</text>
+    <text x="26" y="76" fill="#111827">9</text>
+    <text x="70" y="76" fill="#4f46e5">1</text>
+  </g>
+</svg>
