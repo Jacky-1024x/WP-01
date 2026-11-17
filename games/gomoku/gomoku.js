@@ -1,4 +1,5 @@
 import { initPage, storage, toast } from '../../js/pwa.js';
+import { play } from '../../js/sfx.js';
 import { SIZE, BLACK, WHITE, findWinLine } from './ai.js';
 
 initPage();
@@ -118,6 +119,7 @@ function place(p) {
   moves.push(p);
   board[p] = color;
   preview = -1;
+  play('place');
   const line = findWinLine(board, p);
   if (line) {
     winLine = line;
@@ -142,12 +144,15 @@ function finish(winner) {
     title = '🎉 你赢了！';
     detail = `${LEVEL_NAMES[settings.level]}难度，共 ${moves.length} 手`;
     navigator.vibrate?.([30, 40, 30]);
+    play('win', 0.3);
   } else if (winner) {
     s.l++;
     title = '😵 AI 获胜';
     detail = '可以悔棋再试，或者换个难度再来一局';
+    play('lose', 0.3);
   } else {
     s.d++;
+    play('draw', 0.3);
     title = '平局';
     detail = '棋盘已下满';
   }
@@ -391,8 +396,10 @@ canvas.addEventListener('pointerup', (e) => {
   if (moved > geo.cell * 0.8) return;
   if (gameOver || thinking || turnColor() !== playerColor) return;
   const p = pointFromEvent(e);
-  if (p < 0 || board[p]) return;
+  if (p < 0) return;
+  if (board[p]) return play('error');
   if (settings.confirm && preview !== p) {
+    play('select');
     preview = p;
     draw();
     updateUI();

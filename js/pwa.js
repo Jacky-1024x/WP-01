@@ -1,4 +1,5 @@
-// 所有页面共享：注册 Service Worker，并屏蔽 iOS 上干扰游戏的缩放手势。
+// 所有页面共享：注册 Service Worker、屏蔽 iOS 上干扰游戏的缩放手势、启用通用音效。
+import { initSfx } from './sfx.js';
 
 const ROOT = new URL('../', import.meta.url);
 
@@ -76,4 +77,5 @@ export function storage(key, fallback) {
 export function initPage() {
   registerServiceWorker();
   preventZoom();
+  initSfx();
 }

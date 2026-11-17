@@ -25,7 +25,8 @@ H5-Game/
 ├── js/
 │   ├── games.js            # 游戏清单（唯一数据源，主页与 sw.js 共用）
 │   ├── home.js             # 主页渲染
-│   └── pwa.js              # 共享工具：注册 SW、屏蔽缩放手势、localStorage、toast
+│   ├── pwa.js              # 共享工具：注册 SW、屏蔽缩放手势、localStorage、toast
+│   └── sfx.js              # 通用音效（Web Audio 实时合成）与音效开关
 ├── games/
 │   ├── klotski/            # 数字华容道
 │   │   ├── index.html
@@ -88,7 +89,8 @@ GitHub Pages 自带 HTTPS，满足 PWA 要求。
    - `<head>` 中的 viewport、`apple-mobile-web-app-*`、manifest、apple-touch-icon 等 meta 与 link（路径用 `../../`）；
    - 引用 `../../css/common.css`；
    - 顶栏中返回主页的链接 `<a class="icon-btn" href="../../">`；
-   - 在脚本中 `import { initPage } from '../../js/pwa.js'; initPage();`（注册 Service Worker 并屏蔽缩放手势）。
+   - 顶栏中的音效开关 `<button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>`；
+   - 在脚本中 `import { initPage } from '../../js/pwa.js'; initPage();`（注册 Service Worker、屏蔽缩放手势、启用音效）。
 2. 在 `js/games.js` 的 `H5_GAMES` 数组中追加一项：
 
    ```js
@@ -105,6 +107,19 @@ GitHub Pages 自带 HTTPS，满足 PWA 要求。
 
    主页会自动出现新卡片，Service Worker 也会自动预缓存 `files` 中列出的文件。
 3. **修改 `sw.js` 顶部的 `VERSION`**（例如 `v1.0.0` → `v1.1.0`）。Service Worker 采用缓存优先策略，每次发布任何改动都要更新版本号，用户下次打开时才会拿到新版本（新版本接管后页面会自动刷新一次）。
+
+## 音效
+
+`js/sfx.js` 用 Web Audio API 实时合成音效，没有音频文件，离线可用、无加载延迟；首次触摸 / 点击 / 按键时解锁音频（浏览器要求），开关状态保存在本机。
+
+- **自动点击音**：所有页面的 `button` 和 `a` 点击时自动播放 `tap`，带 `aria-pressed` 的切换按钮播放 `select`。可用 `data-sfx="chip"` 等指定其他音效，`data-sfx="none"` 关闭。
+- **在游戏中播放**：`import { play } from '../../js/sfx.js'; play('place');`，第二个参数为延迟秒数，如 `play('win', 0.3)`。
+
+| 分类 | 名称 | 用途 |
+| --- | --- | --- |
+| 界面 | `tap` / `select` / `error` | 按钮点击 / 切换选择 / 无效操作 |
+| 游戏 | `move` / `place` / `card` / `chip` | 滑动移动 / 落子放置 / 发牌翻牌 / 筹码金币 |
+| 结果 | `win` / `lose` / `draw` | 胜利 / 失败 / 平局 |
 
 修改 `icons/icon.svg` 后可运行 `bash scripts/gen-icons.sh` 重新生成 PNG（依次尝试 rsvg-convert、ImageMagick、macOS 自带的 qlmanage + sips）。
 

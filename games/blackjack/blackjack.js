@@ -1,4 +1,5 @@
 import { initPage, storage, toast } from '../../js/pwa.js';
+import { play } from '../../js/sfx.js';
 import {
   createGame,
   deal,
@@ -110,7 +111,8 @@ function renderCards(container, cards, prefix, hideFrom = Infinity) {
     if (!seen.has(key)) {
       seen.add(key);
       el.classList.add('deal');
-      el.style.animationDelay = `${fresh++ * 90}ms`;
+      el.style.animationDelay = `${fresh * 90}ms`;
+      play('card', fresh++ * 0.09);
     }
     container.appendChild(el);
   });
@@ -229,6 +231,7 @@ function onSettled() {
   if (game.bankroll < MIN_CHIP) message = { text: `${text} · 筹码已输光`, tone: 'lose' };
   pendingBet = lastBet <= game.bankroll ? lastBet : 0;
   if (navigator.vibrate) navigator.vibrate(net > 0 ? [12, 60, 12] : 10);
+  play(net > 0 ? 'win' : net < 0 ? 'lose' : 'draw', 0.4);
 }
 
 function runDealer() {
@@ -264,6 +267,7 @@ function onDeal() {
     stats.bailouts++;
     pendingBet = 0;
     lastBet = 0;
+    play('chip');
     message = { text: `已领取 ${START_BANKROLL} 筹码`, tone: '' };
     render();
     save();

@@ -1,4 +1,5 @@
 import { initPage, storage } from '../../js/pwa.js';
+import { play } from '../../js/sfx.js';
 import { shuffle, isSolved, moveAt, moveDirection } from './puzzle.js';
 
 initPage();
@@ -156,6 +157,7 @@ function afterMove(count) {
     startTimer();
   }
   moves += count;
+  play('move');
   if (isSolved(tiles)) onWin();
   renderTiles();
   renderStats();
@@ -166,6 +168,7 @@ function afterMove(count) {
 function onWin() {
   won = true;
   pauseTimer();
+  play('win', 0.15);
   const time = elapsed;
   const all = bestStore.get();
   const prev = all[n];

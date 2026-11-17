@@ -5,6 +5,12 @@
   padding: 24px 20px 12px;
 }
 
+.hero .icon-btn {
+  margin-left: auto;
+  align-self: flex-start;
+  color: var(--text-dim);
+}
+
 .hero img {
   border-radius: 14px;
   box-shadow: var(--shadow);
