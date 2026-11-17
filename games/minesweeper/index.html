@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>扫雷 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="minesweeper.css">
+  <script type="module" src="minesweeper.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <button class="icon-btn" id="restartBtn" aria-label="重新开始">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1>扫雷</h1>
+      <button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="controls-top">
+      <div class="segmented" id="levelSelect" role="group" aria-label="难度">
+        <button data-level="beginner">初级</button>
+        <button data-level="intermediate">中级</button>
+        <button data-level="expert">高级</button>
+      </div>
+      <div class="status">
+        <div class="led" aria-label="剩余雷数">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mine"/></svg>
+          <span id="minesLeft">010</span>
+        </div>
+        <button class="face-btn" id="faceBtn" data-sfx="none" aria-label="新局"></button>
+        <div class="led" aria-label="用时">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 12V7.5M12 12h3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span id="timer">000</span>
+        </div>
+      </div>
+    </div>
+
+    <main class="board-wrap" id="boardWrap">
+      <div class="board" id="board" role="grid" aria-label="棋盘"></div>
+    </main>
+
+    <div class="controls">
+      <div class="segmented mode-select" id="modeSelect" role="group" aria-label="操作模式">
+        <button data-mode="dig" data-sfx="select">
+          <i class="mode-icon dig" aria-hidden="true"></i>挖开
+        </button>
+        <button data-mode="flag" data-sfx="select">
+          <i class="mode-icon flag" aria-hidden="true"></i>插旗
+        </button>
+      </div>
+      <button class="zoom-btn" id="zoomBtn" data-sfx="select" aria-label="放大" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5 20 20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M7.5 10.5h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path class="zoom-v" d="M10.5 7.5v6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal-card">
+      <div class="result-face" id="resultFace"></div>
+      <h2 id="resultTitle"></h2>
+      <p id="resultDetail"></p>
+      <div class="record" id="resultRecord" hidden>新纪录！</div>
+      <div class="progress" id="resultProgress" hidden><i></i></div>
+      <div class="stats" id="resultStats"></div>
+      <div class="actions">
+        <button class="btn" id="resultClose">查看棋盘</button>
+        <button class="btn primary" id="resultAgain">再来一局</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h2>放弃本局？</h2>
+      <p id="confirmText"></p>
+      <div class="actions">
+        <button class="btn" data-close>取消</button>
+        <button class="btn primary" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>玩法说明</h2>
+      <ul>
+        <li>挖开所有不是雷的格子就赢了，挖到雷就输了。</li>
+        <li>数字表示周围 8 格里有几颗雷。第一下一定安全。</li>
+        <li>底部切换「挖开 / 插旗」决定轻点的效果，<b>长按</b>执行另一种操作。</li>
+        <li>数字周围插满对应数量的旗后，点这个数字可以一次挖开周围其余的格子。</li>
+        <li>中级、高级可用右下角按钮或双指捏合放大，放大后单指拖动查看。</li>
+        <li>电脑上：左键挖开，右键插旗，方向键 + 空格 / F 也可以操作。</li>
+      </ul>
+      <div class="setting">
+        <span>问号标记</span>
+        <div class="segmented" id="marksSelect" role="group" aria-label="问号标记">
+          <button data-marks="off">关</button>
+          <button data-marks="on">开</button>
+        </div>
+      </div>
+      <div class="setting">
+        <span>长按时长</span>
+        <div class="segmented" id="holdSelect" role="group" aria-label="长按时长">
+          <button data-hold="250">短</button>
+          <button data-hold="350">中</button>
+          <button data-hold="500">长</button>
+        </div>
+      </div>
+      <div class="actions"><button class="btn primary" data-close>知道了</button></div>
+    </div>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-mine" viewBox="0 0 24 24">
+      <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16M12 4v16M6.3 6.3l11.4 11.4M6.3 17.7 17.7 6.3"/></g>
+      <circle cx="12" cy="12" r="5.2" fill="currentColor"/>
+    </symbol>
+  </svg>
+</body>
+</html>

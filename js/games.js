@@ -48,6 +48,15 @@ self.H5_GAMES = [
     files: ['index.html', 'codelights.css', 'codelights.js', 'engine.js'],
   },
   {
+    id: 'minesweeper',
+    name: '扫雷',
+    desc: '经典扫雷，初级 / 中级 / 高级三档。第一下必定安全，手机上轻点挖开、长按插旗。',
+    path: 'games/minesweeper/',
+    icon: 'icons/minesweeper.svg',
+    tags: ['益智', '单人'],
+    files: ['index.html', 'minesweeper.css', 'minesweeper.js', 'board.js'],
+  },
+  {
     id: 'sudoku',
     name: '数独',
     desc: '经典 9×9 数独，四档难度，每题唯一解且无需猜测；支持笔记与三级提示。',

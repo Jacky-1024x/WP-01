@@ -6,6 +6,7 @@ import * as bj from '../games/blackjack/engine.js';
 import * as mj from '../games/mahjong/engine.js';
 import { chooseClaim, chooseSelfAction, shanten } from '../games/mahjong/ai.js';
 import * as cl from '../games/codelights/engine.js';
+import * as ms from '../games/minesweeper/board.js';
 import * as sdSolver from '../games/sudoku/solver.js';
 import * as sdGen from '../games/sudoku/generator.js';
 import * as sd from '../games/sudoku/board.js';
@@ -812,6 +813,205 @@ test('存档还原：合法存档原样恢复，篡改或不一致的存档被�
   assert.equal(cl.restoreGame({ ...save, rows: [{ guess: ['R', 'R', 'O', 'Y'] }] }), null);
   assert.equal(cl.restoreGame({ ...save, status: 'won' }), null);
   assert.equal(cl.restoreGame({ ...save, rows: [{ guess: ['B', 'R', 'P', 'Y'] }, ...save.rows] }), null, '胜利后不能还有行');
+});
+
+console.log('扫雷');
+
+// 用字符画摆雷：* 为雷，其余为空。直接布好雷并标记为进行中，跳过「第一下安全」
+function mineGame(rows) {
+  const g = ms.createGame('beginner');
+  g.rows = rows.length;
+  g.cols = rows[0].length;
+  g.state = new Uint8Array(g.cols * g.rows);
+  g.mine = Uint8Array.from(rows.join(''), (ch) => (ch === '*' ? 1 : 0));
+  g.mines = g.mine.reduce((a, b) => a + b, 0);
+  g.count = new Uint8Array(g.cols * g.rows);
+  for (let i = 0; i < g.mine.length; i++) {
+    if (g.mine[i]) for (const n of ms.neighbors(g, i)) g.count[n]++;
+  }
+  g.status = 'playing';
+  return g;
+}
+
+test('第一下及周围 8 格无雷，雷数与数字正确（含角落和边）', () => {
+  const rng = mulberry32(5);
+  for (const level of Object.keys(ms.LEVELS)) {
+    for (let k = 0; k < 200; k++) {
+      const g = ms.createGame(level, k % 2 === 0);
+      const total = g.cols * g.rows;
+      const first = [0, g.cols - 1, total - 1, Math.floor(total / 2), Math.floor(rng() * total)][k % 5];
+      const res = ms.reveal(g, first, rng);
+      assert.equal(res.exploded, -1);
+      assert.equal(g.mine.reduce((a, b) => a + b, 0), g.mines);
+      for (const i of [first, ...ms.neighbors(g, first)]) assert.equal(g.mine[i], 0);
+      assert.equal(g.count[first], 0, '第一下一定是空白格');
+      for (let i = 0; i < total; i++) {
+        assert.equal(g.count[i], ms.neighbors(g, i).filter((n) => g.mine[n]).length);
+      }
+    }
+  }
+});
+
+test('高级竖屏转置为 16 × 30，横屏为 30 × 16', () => {
+  const p = ms.createGame('expert', true);
+  assert.deepEqual([p.cols, p.rows, p.mines], [16, 30, 99]);
+  const l = ms.createGame('expert', false);
+  assert.deepEqual([l.cols, l.rows, l.mines], [30, 16, 99]);
+  assert.deepEqual([ms.createGame('intermediate', true).cols, ms.createGame('beginner', true).rows], [16, 9]);
+});
+
+test('自动展开：空白格向外扩散，数字格是边界，不越过旗，层数单调不减', () => {
+  const g = mineGame([
+    '.....',
+    '.....',
+    '...**',
+    '.....',
+    '*....',
+  ]);
+  g.state[1] = ms.FLAG;
+  g.flags = 1;
+  const res = ms.reveal(g, 0);
+  const opened = res.opened.map(([i]) => i).sort((a, b) => a - b);
+  // 插了旗的第 1 格不会被展开，但扩散会绕过它到达第 4 格
+  assert.ok(!opened.includes(1));
+  assert.equal(g.state[1], ms.FLAG);
+  assert.ok(opened.includes(4));
+  for (const [i] of res.opened) assert.equal(g.mine[i], 0);
+  const layers = res.opened.map(([, l]) => l);
+  assert.deepEqual(layers, [...layers].sort((a, b) => a - b));
+  // 第 15 格是数字 1，停在这里，不会越过去碰到第 20 格的雷；最下面一行右侧被雷隔开，不会被展开
+  assert.ok(opened.includes(15));
+  assert.equal(g.count[15], 1);
+  assert.ok(!opened.includes(21));
+  assert.equal(g.status, 'playing');
+  assert.equal(g.opened, opened.length);
+});
+
+test('插旗 / 拔旗 / 问号循环；已挖开的格子不能插旗；插旗格不能挖开', () => {
+  const g = mineGame(['*..', '...', '...']);
+  assert.equal(ms.toggleFlag(g, 0), ms.FLAG);
+  assert.equal(ms.minesLeft(g), 0);
+  assert.equal(ms.reveal(g, 0), null, '插旗格不能挖开');
+  assert.equal(ms.toggleFlag(g, 0), ms.HIDDEN);
+  assert.equal(ms.toggleFlag(g, 0, true), ms.FLAG);
+  assert.equal(ms.toggleFlag(g, 0, true), ms.MARK);
+  assert.equal(g.flags, 0, '问号不计入旗数');
+  assert.equal(ms.toggleFlag(g, 0, true), ms.HIDDEN);
+  ms.reveal(g, 4);
+  assert.equal(ms.toggleFlag(g, 4), null);
+  ms.toggleFlag(g, 1);
+  ms.toggleFlag(g, 2);
+  assert.equal(ms.minesLeft(g), -1, '旗数可以超过雷数');
+});
+
+test('快速挖开：旗数相等才挖开；旗数不符返回待闪烁的格子；旗插错则失败', () => {
+  let g = mineGame(['*..', '...', '..*']);
+  ms.reveal(g, 4); // 中心是 2
+  assert.equal(g.count[4], 2);
+  ms.toggleFlag(g, 0);
+  const bad = ms.chord(g, 4);
+  assert.equal(bad.ok, false);
+  assert.deepEqual(bad.targets.sort((a, b) => a - b), [1, 2, 3, 5, 6, 7, 8]);
+  ms.toggleFlag(g, 8);
+  const ok = ms.chord(g, 4);
+  assert.equal(ok.ok, true);
+  assert.equal(g.status, 'won', '挖开其余 6 格即胜利');
+  assert.equal(ms.chord(g, 4), null, '结束后不再响应');
+
+  g = mineGame(['*..', '...', '..*']);
+  ms.reveal(g, 4);
+  ms.toggleFlag(g, 0);
+  ms.toggleFlag(g, 1); // 插错
+  const lost = ms.chord(g, 4);
+  assert.equal(lost.exploded, 8);
+  assert.equal(g.status, 'lost');
+  assert.equal(g.exploded, 8);
+  assert.equal(ms.toggleFlag(g, 2), null, '失败后棋盘只读');
+
+  g = mineGame(['*..', '...', '...']);
+  ms.reveal(g, 8);
+  assert.equal(ms.chord(g, 8), null, '空白格不能快速挖开');
+});
+
+test('胜利：挖开全部非雷格即胜利，剩余的雷自动插旗', () => {
+  const g = mineGame(['*....', '.....', '....*']);
+  ms.toggleFlag(g, 0);
+  const res = ms.reveal(g, 12);
+  assert.equal(g.status, 'won');
+  assert.equal(g.opened, ms.safeTotal(g));
+  assert.deepEqual(res.autoFlagged, [14]);
+  assert.equal(g.flags, g.mines);
+  assert.equal(ms.reveal(g, 1), null);
+});
+
+test('随机对局 600 局：挖开数守恒，结束状态与棋盘一致', () => {
+  const rng = mulberry32(99);
+  let wins = 0;
+  for (let k = 0; k < 600; k++) {
+    const level = ['beginner', 'intermediate', 'expert'][k % 3];
+    const g = ms.createGame(level, k % 2 === 1);
+    const total = g.cols * g.rows;
+    const pick = (arr) => arr[Math.floor(rng() * arr.length)];
+    let guard = 0;
+    while (!['won', 'lost'].includes(g.status) && guard++ < total * 10) {
+      // 偶尔插旗 / 快速挖开，大多数时候挖开一个安全格（模拟会推理的玩家），少数时候乱挖
+      const r = rng();
+      if (r < 0.1) ms.toggleFlag(g, Math.floor(rng() * total));
+      else if (r < 0.2) ms.chord(g, Math.floor(rng() * total));
+      else {
+        const closed = [...g.state.keys()].filter((i) => g.state[i] === ms.HIDDEN || g.state[i] === ms.MARK);
+        const safe = g.mine ? closed.filter((i) => !g.mine[i]) : closed;
+        ms.reveal(g, pick(safe.length && rng() < 0.97 ? safe : closed), rng);
+      }
+      assert.equal(g.opened, g.state.filter((s) => s === ms.OPEN).length);
+      assert.equal(g.flags, g.state.filter((s) => s === ms.FLAG).length);
+    }
+    assert.ok(['won', 'lost'].includes(g.status), `第 ${k} 局没有结束`);
+    if (g.status === 'won') {
+      wins++;
+      assert.equal(g.opened, ms.safeTotal(g));
+      for (let i = 0; i < total; i++) assert.equal(g.state[i] === ms.FLAG, !!g.mine[i]);
+    } else {
+      assert.equal(g.mine[g.exploded], 1);
+      assert.ok(g.opened < ms.safeTotal(g));
+    }
+    for (let i = 0; i < total; i++) if (g.state[i] === ms.OPEN) assert.equal(g.mine[i], 0);
+  }
+  assert.ok(wins > 0);
+});
+
+test('存档还原：进行中与未开始的对局原样恢复，篡改或不一致的存档被丢弃', () => {
+  const rng = mulberry32(8);
+  const g = ms.createGame('expert', true);
+  ms.toggleFlag(g, 0);
+  const ready = ms.restoreGame(JSON.parse(JSON.stringify(ms.serialize(g))));
+  assert.equal(ready.status, 'ready');
+  assert.equal(ready.flags, 1);
+
+  ms.reveal(g, 200, rng);
+  ms.toggleFlag(g, 1, true);
+  ms.toggleFlag(g, 1, true);
+  g.elapsed = 12345;
+  const save = JSON.parse(JSON.stringify(ms.serialize(g)));
+  const back = ms.restoreGame(save);
+  assert.deepEqual([back.cols, back.rows, back.status, back.elapsed], [16, 30, 'playing', 12345]);
+  assert.deepEqual([...back.state], [...g.state]);
+  assert.deepEqual([...back.mine], [...g.mine]);
+  assert.deepEqual([...back.count], [...g.count]);
+  assert.equal(back.opened, g.opened);
+  assert.equal(back.flags, g.flags);
+  ms.reveal(back, [...back.mine.keys()].find((i) => back.mine[i] && back.state[i] === ms.HIDDEN));
+  assert.equal(back.status, 'lost', '还原后可以继续对局');
+
+  assert.equal(ms.restoreGame(null), null);
+  assert.equal(ms.restoreGame({ ...save, level: 'nope' }), null);
+  assert.equal(ms.restoreGame({ ...save, cols: 20 }), null);
+  assert.equal(ms.restoreGame({ ...save, mine: save.mine.replace('1', '0') }), null, '雷数不符');
+  const openMine = save.mine.indexOf('1');
+  const badState = save.state.slice(0, openMine) + '1' + save.state.slice(openMine + 1);
+  assert.equal(ms.restoreGame({ ...save, state: badState }), null, '雷不能是已挖开状态');
+  assert.equal(ms.restoreGame({ ...save, status: 'won' }), null, '已结束的对局不存档');
+  assert.equal(ms.restoreGame({ ...save, mine: null }), null);
 });
 
 console.log('数独');
