@@ -1,0 +1,661 @@
+/* 左侧一个返回按钮、右侧选关和帮助两个按钮：标题左侧补一个按钮宽度才能居中 */
+.topbar h1 {
+  padding-left: var(--tap);
+}
+
+/* 状态栏：三格数值 */
+.hud {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.hud div {
+  padding: 4px 4px 5px;
+  border-radius: 12px;
+  background: var(--border);
+  text-align: center;
+}
+
+.hud span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.hud em {
+  font-style: normal;
+}
+
+.hud b {
+  display: block;
+  font-size: 18px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud b.perfect {
+  color: #16a34a;
+}
+
+.hud b.over {
+  color: var(--accent);
+}
+
+/* 地图区 + 控制区；横屏矮屏时左右排列 */
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stage-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  overflow: hidden;
+}
+
+.stage {
+  --s: 40px;
+  --t: 90ms;
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+
+.stage canvas {
+  display: block;
+}
+
+.stage.won {
+  animation: stage-glow 1s ease-out;
+}
+
+@keyframes stage-glow {
+  30% { filter: drop-shadow(0 0 14px rgba(22, 163, 74, 0.7)); }
+}
+
+.sprites {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* 箱子与玩家：用 --x / --y 定位，transform 过渡做移动动画 */
+.sprite {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--s);
+  height: var(--s);
+  transform: translate(calc(var(--x) * var(--s)), calc(var(--y) * var(--s)));
+  transition: transform var(--t) ease-out;
+}
+
+.stage.instant .sprite {
+  transition: none;
+}
+
+.sprite svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.player {
+  z-index: 2;
+}
+
+.player .body {
+  width: 100%;
+  height: 100%;
+  transform: rotate(var(--rot, 90deg));
+}
+
+.player.bump .body {
+  animation: bump 0.12s ease-out;
+}
+
+@keyframes bump {
+  50% { translate: var(--bx) var(--by); }
+}
+
+.box {
+  --fill: #d97706;
+  --line: #b45309;
+  z-index: 1;
+}
+
+.box .crate {
+  width: 100%;
+  height: 100%;
+}
+
+.box.ok {
+  --fill: #16a34a;
+  --line: #15803d;
+}
+
+.box.dead {
+  --fill: #dc2626;
+  --line: #991b1b;
+}
+
+.box.shake .crate {
+  animation: shake 0.25s ease;
+}
+
+.box.hop .crate {
+  animation: hop 0.36s ease-out var(--d, 0ms) backwards;
+}
+
+.box.glow::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 18%;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: glow 0.35s ease-out forwards;
+  pointer-events: none;
+}
+
+.box .aim {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: rotate(var(--rot, 0deg));
+  transition: opacity 0.12s ease;
+}
+
+.box .aim svg {
+  width: 46%;
+  height: 46%;
+}
+
+.box.aiming .aim {
+  opacity: 1;
+}
+
+@keyframes shake {
+  25% { transform: translateX(-12%); }
+  75% { transform: translateX(12%); }
+}
+
+@keyframes hop {
+  0% { transform: none; }
+  40% { transform: translateY(-28%) scale(1.06); }
+  70% { transform: translateY(0) scale(1.04, 0.94); }
+  100% { transform: none; }
+}
+
+@keyframes glow {
+  to { box-shadow: 0 0 0 calc(var(--s) * 0.22) rgba(34, 197, 94, 0); }
+}
+
+/* 底部控制区：工具按钮 + 圆形方向盘；.left 时左右镜像 */
+.controls {
+  /* 同时参考宽和高：矮屏（iPhone SE）自动缩小，给地图留空间 */
+  --d: clamp(140px, min(42vw, 23vh), 180px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 4px calc(var(--safe-right) + 16px) calc(var(--safe-bottom) + 12px) calc(var(--safe-left) + 14px);
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.controls.left {
+  flex-direction: row-reverse;
+  padding-left: calc(var(--safe-left) + 16px);
+  padding-right: calc(var(--safe-right) + 14px);
+}
+
+.tools {
+  display: grid;
+  grid-template-columns: 44px 60px;
+  grid-template-rows: 44px 44px;
+  grid-template-areas: "restart undo" "settings undo";
+  gap: 12px;
+  align-items: center;
+}
+
+.controls.left .tools {
+  grid-template-columns: 60px 44px;
+  grid-template-areas: "undo restart" "undo settings";
+}
+
+.tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  touch-action: none;
+  transition: transform 0.06s ease, opacity 0.15s ease;
+}
+
+.tool svg {
+  width: 22px;
+  height: 22px;
+}
+
+.tool small {
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text-dim);
+}
+
+.tool.on {
+  transform: scale(0.94);
+}
+
+.tool:disabled {
+  opacity: 0.4;
+}
+
+.tool-restart {
+  grid-area: restart;
+}
+
+.tool-settings {
+  grid-area: settings;
+}
+
+.tool-undo {
+  grid-area: undo;
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+}
+
+.tool-undo svg {
+  width: 28px;
+  height: 28px;
+}
+
+.tool-undo small {
+  font-size: 11px;
+}
+
+/* 方向盘：外层是判定区域（比圆盘大 16px），内层是看得见的圆盘 */
+.dpad {
+  flex-shrink: 0;
+  width: calc(var(--d) + 32px);
+  height: calc(var(--d) + 32px);
+  margin: -16px;
+  padding: 16px;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.dpad[hidden] {
+  display: none;
+}
+
+.dpad-face {
+  position: relative;
+  width: var(--d);
+  height: var(--d);
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+}
+
+/* 斜向分隔线 */
+.dpad-face::before,
+.dpad-face::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1.5px;
+  height: 100%;
+  margin-left: -0.75px;
+  background: var(--border);
+  transform: rotate(45deg);
+}
+
+.dpad-face::after {
+  transform: rotate(-45deg);
+}
+
+/* 每个扇形都是“上”扇形旋转 90° × 方向 */
+.wedge {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 50%, 0 0, 100% 0);
+  transform: rotate(calc(var(--i) * 90deg));
+  transition: background 0.08s ease;
+}
+
+.wedge[data-dir="0"] { --i: 0; }
+.wedge[data-dir="1"] { --i: 1; }
+.wedge[data-dir="2"] { --i: 2; }
+.wedge[data-dir="3"] { --i: 3; }
+
+.wedge.on {
+  background: rgba(79, 70, 229, 0.16);
+}
+
+.wedge i {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--d) * 0.15);
+  width: calc(var(--d) * 0.1);
+  height: calc(var(--d) * 0.1);
+  margin-left: calc(var(--d) * -0.05);
+  border-left: 3px solid var(--text-dim);
+  border-top: 3px solid var(--text-dim);
+  border-radius: 2px;
+  transform: translateY(25%) rotate(45deg);
+}
+
+.wedge.on i {
+  border-color: var(--primary);
+}
+
+.dpad-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--d) * 0.38);
+  height: calc(var(--d) * 0.38);
+  margin: calc(var(--d) * -0.19) 0 0 calc(var(--d) * -0.19);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #e5e7f0;
+  color: #9ca3af;
+  box-shadow: inset 0 0 0 1.5px rgba(17, 24, 39, 0.06);
+  transition: background 0.12s ease, color 0.12s ease, transform 0.06s ease;
+}
+
+.dpad-center svg {
+  display: none;
+  width: 40%;
+  height: 40%;
+  margin-bottom: -2px;
+  transform: rotate(var(--rot, 0deg));
+}
+
+.dpad-center span {
+  font-size: calc(var(--d) * 0.085);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.dpad-center.ready {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.45);
+  animation: ready-pop 0.25s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.dpad-center.ready svg {
+  display: block;
+}
+
+.dpad-center.ready span {
+  font-size: calc(var(--d) * 0.065);
+}
+
+.dpad-center.on {
+  transform: scale(0.92);
+}
+
+.dpad-center.shake {
+  animation: shake-c 0.25s ease;
+}
+
+@keyframes ready-pop {
+  from { transform: scale(0.85); }
+}
+
+@keyframes shake-c {
+  25% { translate: -4px 0; }
+  75% { translate: 4px 0; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .dpad-center {
+    background: #252a36;
+    color: #6b7280;
+  }
+
+  .wedge.on {
+    background: rgba(129, 140, 248, 0.22);
+  }
+}
+
+/* 横屏矮屏：地图在左，控制区竖排在右（左手模式在左） */
+@media (orientation: landscape) and (max-height: 540px) {
+  .main {
+    flex-direction: row;
+  }
+
+  .controls {
+    --d: clamp(140px, 36vh, 176px);
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 0;
+  }
+
+  .controls.left {
+    flex-direction: column;
+    order: -1;
+  }
+
+  .tools,
+  .controls.left .tools {
+    grid-template-columns: 44px 60px 44px;
+    grid-template-rows: 60px;
+    grid-template-areas: "restart undo settings";
+  }
+}
+
+/* 竖屏矮屏：压缩顶栏和状态栏，把空间留给地图 */
+@media (orientation: portrait) and (max-height: 700px) {
+  .topbar {
+    min-height: 48px;
+  }
+
+  .hud div {
+    padding: 2px 4px 3px;
+  }
+
+  .hud span {
+    font-size: 10px;
+  }
+
+  .hud b {
+    font-size: 16px;
+  }
+}
+
+/* 选关 */
+.levels-card {
+  width: min(400px, 100%);
+}
+
+.levels-list {
+  max-height: 56vh;
+  overflow-y: auto;
+  margin-top: 8px;
+  text-align: left;
+  -webkit-overflow-scrolling: touch;
+}
+
+.levels-list h3 {
+  margin: 12px 0 6px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.level-grid button {
+  position: relative;
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bg);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.level-grid button small {
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.level-grid button.solved small {
+  color: #16a34a;
+}
+
+.level-grid button.perfect small {
+  color: #f59e0b;
+}
+
+.level-grid button.current {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.level-grid button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* 设置 */
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.setting .segmented {
+  width: 168px;
+}
+
+.setting .segmented button {
+  min-height: 34px;
+  font-size: 14px;
+}
+
+.sound-btn {
+  width: 44px;
+  height: 40px;
+  background: var(--border);
+}
+
+.sound-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* 过关弹窗 */
+.stars {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f59e0b;
+  min-height: 1.4em;
+}
+
+.record {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 12px;
+  border-radius: 99px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 700;
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) 0.2s backwards;
+}
+
+.record[hidden] {
+  display: none;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.stats div {
+  padding: 10px 4px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.stats b {
+  display: block;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+#resultModal .actions .btn {
+  padding: 0 8px;
+  font-size: 15px;
+}
+
+.help-tip {
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprite {
+    transition: none;
+  }
+
+  .box.hop .crate,
+  .stage.won {
+    animation: none;
+  }
+}

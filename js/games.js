@@ -75,6 +75,15 @@ self.H5_GAMES = [
     files: ['index.html', 'tetris.css', 'tetris.js', 'input.js', 'engine.js'],
   },
   {
+    id: 'sokoban',
+    name: '推箱子',
+    desc: '把箱子推到圆点上。100 关由浅入深，右下角圆形方向盘单手操作，撤销不限次数。',
+    path: 'games/sokoban/',
+    icon: 'icons/sokoban.svg',
+    tags: ['益智', '单人'],
+    files: ['index.html', 'sokoban.css', 'sokoban.js', 'engine.js', 'levels.js'],
+  },
+  {
     id: 'nonogram',
     name: '数织',
     desc: '按行列数字涂黑格子，拼出像素图。5×5 / 10×10 / 15×15 三档，每题唯一解且无需猜测；支持拖动连涂和打叉标记。',

@@ -12,6 +12,9 @@ import * as sdGen from '../games/sudoku/generator.js';
 import * as sd from '../games/sudoku/board.js';
 import { BANK as SD_BANK } from '../games/sudoku/puzzles.js';
 import * as tt from '../games/tetris/engine.js';
+import * as sk from '../games/sokoban/engine.js';
+import { solve as skSolve } from '../games/sokoban/solver.js';
+import { LEVELS as SK_LEVELS, CHAPTERS as SK_CHAPTERS, LEVELS_VERSION as SK_VERSION } from '../games/sokoban/levels.js';
 import { recordClick, sortByUsage } from '../js/usage.js';
 
 let passed = 0;
@@ -1534,6 +1537,169 @@ test('存档还原：还原后继续对局结果完全一致；篡改或不一�
   blocked.fill('1', (save.piece.y + tt.BUFFER) * tt.COLS, (save.piece.y + tt.BUFFER + 4) * tt.COLS);
   assert.equal(tt.restoreGame({ ...save, board: blocked.join('') }), null, '当前方块与场地重叠');
   assert.equal(tt.restoreGame({ ...save, piece: null, clearing: { rows: [19], t: 0 } }), null, '消行的行没填满');
+});
+
+console.log('推箱子');
+
+const skSnapshot = (g) => ({ box: [...g.box].join(''), player: g.player, moves: g.moves, pushes: g.pushes, history: g.history });
+
+test('关卡数据：100 关按章连续；每关合法、尺寸不超过 11 × 11、开局未完成且没有箱子在死格上', () => {
+  assert.equal(SK_LEVELS.length, 100);
+  assert.equal(SK_CHAPTERS[0].from, 0);
+  SK_CHAPTERS.forEach((c, k) => {
+    assert.ok(c.to > c.from);
+    if (k) assert.equal(c.from, SK_CHAPTERS[k - 1].to);
+  });
+  assert.equal(SK_CHAPTERS.at(-1).to, SK_LEVELS.length);
+  const keys = new Set();
+  SK_LEVELS.forEach(({ map, minPushes }, i) => {
+    const g = sk.createGame(map, i);
+    assert.ok(g, `第 ${i + 1} 关解析失败`);
+    assert.ok(g.w <= 11 && g.h <= 11, `第 ${i + 1} 关尺寸 ${g.w}×${g.h}`);
+    assert.equal(g.status, 'playing');
+    assert.ok(minPushes > 0);
+    for (let c = 0; c < g.box.length; c++) assert.ok(!(g.box[c] && g.dead[c]), `第 ${i + 1} 关开局箱子在死格上`);
+    keys.add(sk.levelKey(map));
+  });
+  assert.equal(keys.size, SK_LEVELS.length, '关卡地图不重复');
+});
+
+test('解析：多个玩家、箱子数≠目标数、没被墙围住、非法字符都判为非法', () => {
+  assert.ok(sk.parseLevel(['#####', '#@$.#', '#####']));
+  assert.equal(sk.parseLevel(['#####', '#@@$.#', '#####']), null);
+  assert.equal(sk.parseLevel(['######', '#@$$.#', '######']), null);
+  assert.equal(sk.parseLevel(['#####', '#@$. ', '#####']), null);
+  assert.equal(sk.parseLevel(['#####', '#@$x.#', '#####']), null);
+  assert.equal(sk.parseLevel(['#####', '#@ .#', '#####']), null, '没有箱子');
+});
+
+test('每关正向求解有解且最少推动与关卡数据一致；解法转成走法在引擎里回放能过关', () => {
+  let total = 0;
+  SK_LEVELS.forEach(({ map, minPushes }, i) => {
+    const sol = skSolve(map);
+    assert.ok(sol, `第 ${i + 1} 关无解`);
+    assert.equal(sol.pushes, minPushes, `第 ${i + 1} 关最少推动`);
+    total += sol.states;
+    const g = sk.createGame(map, i);
+    for (const { box, dir } of sol.solution) {
+      const stand = box - sk.delta(g, dir);
+      const path = sk.findPath(g, stand);
+      assert.ok(path, `第 ${i + 1} 关走不到推箱位置`);
+      for (const d of path) assert.equal(sk.step(g, d, false).type, 'move');
+      assert.equal(sk.step(g, dir, false).type, 'aim', '方向键不直接推时先对准');
+      assert.equal(sk.push(g).type, 'push');
+    }
+    assert.equal(g.status, 'won', `第 ${i + 1} 关回放没过关`);
+    assert.equal(g.pushes, minPushes);
+    assert.equal(sk.step(g, 0, true), null, '过关后不再接受移动');
+  });
+  console.log(`    ${SK_LEVELS.length} 关共搜索 ${total} 个状态`);
+});
+
+test('走路、撞墙、对准、推不动、推两个箱子；对准和撞墙不算步数', () => {
+  const g = sk.createGame(['#######', '#@ $ .#', '#  $ .#', '#######']);
+  assert.equal(sk.step(g, 0).type, 'bump');
+  assert.equal(g.moves, 0);
+  assert.equal(g.facing, 0);
+  assert.equal(sk.step(g, 1, false).type, 'move');
+  const aim = sk.step(g, 1, false);
+  assert.equal(aim.type, 'aim');
+  assert.equal(g.moves, 1);
+  assert.equal(sk.aimedBox(g), aim.boxFrom);
+  const res = sk.push(g);
+  assert.deepEqual([res.type, g.moves, g.pushes, g.history], ['push', 2, 1, 'rR']);
+  assert.equal(sk.push(g).type, 'push');
+  assert.equal(g.status, 'playing', '还有箱子没就位');
+  assert.equal(sk.push(g), null, '后面是墙，推不动');
+  // 往下推：下面一格是箱子，再下面是另一个箱子 → 推不动
+  const h = sk.createGame(['#####', '#@  #', '#$  #', '#$  #', '#.  #', '#.  #', '#####']);
+  assert.equal(sk.step(h, 2, true).type, 'blocked');
+  assert.equal(sk.aimedBox(h), -1);
+  assert.equal(h.moves, 0);
+});
+
+test('撤销：随机操作后全部撤销回到开局；撤销推箱子时箱子拉回原位；过关后撤销回到进行中', () => {
+  const rng = mulberry32(31);
+  for (const i of [5, 20, 35, 49]) {
+    const g = sk.createGame(SK_LEVELS[i].map, i);
+    const start = skSnapshot(g);
+    const states = [skSnapshot(g)];
+    for (let k = 0; k < 400; k++) {
+      const res = sk.step(g, Math.floor(rng() * 4), rng() < 0.5);
+      if (res && (res.type === 'move' || res.type === 'push')) states.push(skSnapshot(g));
+      if (g.status !== 'playing') break;
+    }
+    assert.equal(g.moves, g.history.length);
+    assert.equal(g.pushes, [...g.history].filter((c) => c === c.toUpperCase()).length);
+    while (g.history) {
+      states.pop();
+      assert.ok(sk.undo(g));
+      assert.deepEqual(skSnapshot(g), states.at(-1));
+    }
+    assert.deepEqual(skSnapshot(g), start);
+    assert.equal(sk.undo(g), null);
+  }
+  const g = sk.createGame(['#####', '#@$.#', '#####']);
+  sk.step(g, 1, true);
+  assert.equal(g.status, 'won');
+  const res = sk.undo(g);
+  assert.deepEqual([res.type, res.boxFrom, res.boxTo, g.status, g.pushes], ['push', 8, 7, 'playing', 0]);
+});
+
+test('死格：墙角和贴墙且这面墙上没有目标点的格子是死格；目标点永远是活格', () => {
+  const g = sk.createGame(['#######', '#     #', '# $ . #', '#  @  #', '#######']);
+  const deadAt = (x, y) => g.dead[y * g.w + x];
+  for (let x = 1; x <= 5; x++) {
+    assert.equal(deadAt(x, 1), 1, `(${x},1)`);
+    assert.equal(deadAt(x, 3), 1, `(${x},3)`);
+  }
+  assert.deepEqual([deadAt(1, 2), deadAt(2, 2), deadAt(3, 2), deadAt(4, 2), deadAt(5, 2)], [1, 0, 0, 0, 1]);
+  const t = sk.createGame(['#####', '#.$@#', '#####']);
+  assert.equal(t.dead[t.w + 1], 0, '墙角上的目标点不是死格');
+  for (const { map } of SK_LEVELS) {
+    const lv = sk.createGame(map);
+    for (let c = 0; c < lv.target.length; c++) if (lv.target[c]) assert.equal(lv.dead[c], 0);
+  }
+});
+
+test('自动寻路：最短且不穿墙和箱子；同样长度少拐弯；走不到返回 null', () => {
+  const g = sk.createGame(['#######', '#@    #', '#     #', '##$####', '#. #  #', '#######']);
+  const to = 2 * g.w + 5;
+  const path = sk.findPath(g, to);
+  assert.equal(path.length, 5);
+  const turns = path.slice(1).filter((d, k) => d !== path[k]).length;
+  assert.equal(turns, 1, `路径 ${path}`);
+  for (const d of path) assert.equal(sk.step(g, d, false).type, 'move');
+  assert.equal(g.player, to);
+  assert.equal(sk.findPath(g, 4 * g.w + 4), null, '被墙隔开');
+  assert.equal(sk.findPath(g, 3 * g.w + 2), null, '箱子所在格');
+  assert.deepEqual(sk.findPath(g, to), []);
+});
+
+test('存档：按历史回放后局面一致；篡改、版本不符、越界的存档被丢弃；解锁规则', () => {
+  const g = sk.createGame(SK_LEVELS[7].map, 7);
+  const sol = skSolve(SK_LEVELS[7].map);
+  const { box, dir } = sol.solution[0];
+  for (const d of sk.findPath(g, box - sk.delta(g, dir))) sk.step(g, d);
+  sk.step(g, dir, true);
+  sk.step(g, (dir + 2) % 4, true);
+  const save = JSON.parse(JSON.stringify(sk.serialize(g, SK_VERSION)));
+  const back = sk.restoreGame(save, SK_LEVELS, SK_VERSION);
+  assert.deepEqual(skSnapshot(back), skSnapshot(g));
+  assert.equal(back.facing, g.facing);
+  assert.equal(back.index, 7);
+  assert.equal(sk.restoreGame(null, SK_LEVELS, SK_VERSION), null);
+  assert.equal(sk.restoreGame({ ...save, v: SK_VERSION + 1 }, SK_LEVELS, SK_VERSION), null);
+  assert.equal(sk.restoreGame({ ...save, level: SK_LEVELS.length }, SK_LEVELS, SK_VERSION), null);
+  assert.equal(sk.restoreGame({ ...save, history: `${save.history}x` }, SK_LEVELS, SK_VERSION), null);
+  assert.equal(sk.restoreGame({ ...save, history: save.history.toUpperCase() }, SK_LEVELS, SK_VERSION), null, '大小写和是否推箱子不一致');
+  assert.equal(sk.restoreGame({ ...save, history: 'uuuuuuuuuuuu' }, SK_LEVELS, SK_VERSION), null, '撞墙');
+  assert.ok(sk.restoreGame({ ...save, history: '' }, SK_LEVELS, SK_VERSION));
+
+  assert.ok(sk.isUnlocked(2, -1));
+  assert.ok(!sk.isUnlocked(3, -1));
+  assert.ok(sk.isUnlocked(9, 6));
+  assert.ok(!sk.isUnlocked(10, 6));
 });
 
 console.log('主页排序');
