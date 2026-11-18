@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 700" width="660" height="700" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <rect width="660" height="700" fill="#ffffff"/>
+  <!-- phone -->
+  <rect x="20" y="20" width="300" height="660" rx="34" fill="#f4f5fb" stroke="#d1d5db" stroke-width="2"/>
+  <!-- topbar -->
+  <path d="M50 54l-7 8 7 8" fill="none" stroke="#111827" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="170" y="68" font-size="18" font-weight="700" text-anchor="middle" fill="#111827">连线</text>
+  <path d="M244 58h5l6-5v18l-6-5h-5z" fill="#111827"/>
+  <circle cx="290" cy="62" r="10" fill="none" stroke="#111827" stroke-width="2"/>
+  <text x="290" y="67" font-size="13" font-weight="700" text-anchor="middle" fill="#111827">?</text>
+  <!-- size select -->
+  <rect x="36" y="88" width="268" height="36" rx="10" fill="#e5e7eb"/>
+  <rect x="40" y="92" width="50" height="28" rx="7" fill="#ffffff"/>
+  <g font-size="12" font-weight="600" text-anchor="middle" fill="#6b7280">
+    <text x="65" y="111" fill="#111827">5×5</text><text x="118" y="111">6×6</text><text x="170" y="111">7×7</text><text x="222" y="111">8×8</text><text x="274" y="111">9×9</text>
+  </g>
+  <!-- level bar -->
+  <path d="M54 144l-6 7 6 7" fill="none" stroke="#9ca3af" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="170" y="156" font-size="15" font-weight="700" text-anchor="middle" fill="#111827">第 3 关 <tspan font-size="12" font-weight="400" fill="#6b7280">/ 30</tspan> <tspan fill="#f97316">✓</tspan></text>
+  <path d="M286 144l6 7-6 7" fill="none" stroke="#111827" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- stats -->
+  <g font-size="10" text-anchor="middle" fill="#6b7280">
+    <rect x="36" y="172" width="84" height="48" rx="10" fill="#fff" stroke="#e5e7eb"/>
+    <rect x="128" y="172" width="84" height="48" rx="10" fill="#fff" stroke="#e5e7eb"/>
+    <rect x="220" y="172" width="84" height="48" rx="10" fill="#fff" stroke="#e5e7eb"/>
+    <text x="78" y="187">连通</text><text x="170" y="187">铺满</text><text x="262" y="187">步数</text>
+    <text x="78" y="208" font-size="16" font-weight="700" fill="#111827">3/6</text>
+    <text x="170" y="208" font-size="16" font-weight="700" fill="#111827">72%</text>
+    <text x="262" y="205" font-size="16" font-weight="700" fill="#111827">5</text>
+    <text x="262" y="216" font-size="8">最佳 6</text>
+  </g>
+  <!-- board 5x5, cell 52 -->
+  <g transform="translate(40 240)">
+    <rect width="260" height="260" rx="12" fill="#111827"/>
+    <path d="M52 0V260M104 0V260M156 0V260M208 0V260M0 52H260M0 104H260M0 156H260M0 208H260" stroke="#374151" stroke-width="1"/>
+    <rect x="0" y="0" width="104" height="52" fill="#ef4444" opacity="0.3"/>
+    <rect x="52" y="52" width="208" height="52" fill="#ef4444" opacity="0.3"/>
+    <rect x="156" y="0" width="52" height="52" fill="#3b82f6" opacity="0.3"/>
+    <rect x="0" y="52" width="52" height="104" fill="#facc15" opacity="0.2"/>
+    <g fill="none" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M26 26H78V78H234" stroke="#ef4444"/>
+      <path d="M130 26H182" stroke="#3b82f6"/>
+      <path d="M26 78V130" stroke="#facc15"/>
+    </g>
+    <g font-size="17" font-weight="700" text-anchor="middle">
+      <circle cx="26" cy="26" r="18" fill="#ef4444" stroke="#fff" stroke-width="1.5"/><text x="26" y="32" fill="#fff">1</text>
+      <circle cx="234" cy="78" r="18" fill="#ef4444" stroke="#fff" stroke-width="1.5"/><text x="234" y="84" fill="#fff">1</text>
+      <circle cx="130" cy="26" r="18" fill="#3b82f6"/><text x="130" y="32" fill="#fff">2</text>
+      <circle cx="234" cy="26" r="18" fill="#3b82f6"/><text x="234" y="32" fill="#fff">2</text>
+      <circle cx="26" cy="78" r="18" fill="#facc15" stroke="#fff" stroke-width="3"/><text x="26" y="84" fill="#111827">3</text>
+      <circle cx="78" cy="182" r="18" fill="#facc15" stroke="#fff" stroke-width="3"/><text x="78" y="188" fill="#111827">3</text>
+      <circle cx="130" cy="130" r="18" fill="#22c55e"/><text x="130" y="136" fill="#111827">4</text>
+      <circle cx="26" cy="234" r="18" fill="#22c55e"/><text x="26" y="240" fill="#111827">4</text>
+      <circle cx="234" cy="130" r="18" fill="#fb923c"/><text x="234" y="136" fill="#111827">5</text>
+      <circle cx="182" cy="182" r="18" fill="#fb923c"/><text x="182" y="188" fill="#111827">5</text>
+      <circle cx="234" cy="182" r="18" fill="#22d3ee"/><text x="234" y="188" fill="#111827">6</text>
+      <circle cx="182" cy="234" r="18" fill="#22d3ee"/><text x="182" y="240" fill="#111827">6</text>
+    </g>
+    <!-- finger circle -->
+    <circle cx="30" cy="132" r="56" fill="#facc15" opacity="0.25"/>
+  </g>
+  <!-- bottom buttons -->
+  <g font-size="13" font-weight="600" text-anchor="middle">
+    <rect x="36" y="580" width="84" height="44" rx="12" fill="#fff" stroke="#e5e7eb"/><text x="78" y="607" fill="#111827">撤销</text>
+    <rect x="128" y="580" width="84" height="44" rx="12" fill="#fff" stroke="#e5e7eb"/><text x="170" y="607" fill="#111827">重来</text>
+    <rect x="220" y="580" width="84" height="44" rx="12" fill="#4f46e5"/><text x="262" y="607" fill="#fff">提示</text>
+  </g>
+  <!-- labels -->
+  <path d="M326 62H356M326 106H356M326 152H356M326 196H356M326 370H356M326 602H356" stroke="#9ca3af" stroke-dasharray="3 3"/>
+  <g font-size="13" fill="#374151">
+    <text x="362" y="66">顶栏：返回 / 标题 / 音效 / 玩法说明</text>
+    <text x="362" y="110">尺寸：5×5 – 9×9，各自记住进度</text>
+    <text x="362" y="156">关卡栏：上一关 / 第 N 关（点开选关）/ 下一关</text>
+    <text x="362" y="200">状态栏：连通数、铺满率、步数与最佳</text>
+    <text x="362" y="364">棋盘：深色底，端点写颜色编号；</text>
+    <text x="362" y="384">正在拖动 3 号色：两端点白圈高亮，</text>
+    <text x="362" y="404">手指处显示同色半透明大圆</text>
+    <text x="362" y="606">底部：撤销 / 重来 / 提示</text>
+  </g>
+</svg>

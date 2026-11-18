@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>连线 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="flow.css">
+  <script type="module" src="flow.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <h1>连线</h1>
+      <button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="controls-top">
+      <div class="segmented" id="sizeSelect" role="group" aria-label="尺寸">
+        <button data-size="5">5×5</button>
+        <button data-size="6">6×6</button>
+        <button data-size="7">7×7</button>
+        <button data-size="8">8×8</button>
+        <button data-size="9">9×9</button>
+      </div>
+      <div class="level-bar">
+        <button class="icon-btn" id="prevBtn" aria-label="上一关">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="level-label" id="levelBtn" aria-label="选择关卡">
+          <span id="levelText">第 1 关</span><span class="level-total" id="levelTotal">/ 30</span>
+          <i class="level-mark" id="levelMark"></i>
+        </button>
+        <button class="icon-btn" id="nextBtn" aria-label="下一关">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="label">连通</span><span class="value" id="flows">0/0</span></div>
+        <div class="stat"><span class="label">铺满</span><span class="value" id="fill">0%</span></div>
+        <div class="stat"><span class="label">步数</span><span class="value" id="moves">0</span><span class="sub" id="best">最佳 —</span></div>
+      </div>
+    </div>
+
+    <main class="board-wrap" id="boardWrap">
+      <canvas class="board" id="board" aria-label="棋盘"></canvas>
+    </main>
+
+    <div class="controls-bottom">
+      <button class="btn" id="undoBtn">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 7 4.5 11.5 9 16M5 11.5h9.5a5 5 0 0 1 0 10H12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        撤销
+      </button>
+      <button class="btn" id="restartBtn">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        重来
+      </button>
+      <button class="btn primary" id="hintBtn" data-sfx="none">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="hintText">提示</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal" id="winModal" hidden>
+    <div class="modal-card">
+      <h2 id="winTitle">完成！</h2>
+      <p id="winDetail"></p>
+      <p id="winRecord" class="record"></p>
+      <div class="actions">
+        <button class="btn" id="winClose">查看棋盘</button>
+        <button class="btn primary" id="winNext">下一关</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="levelModal" hidden>
+    <div class="modal-card">
+      <h2 id="levelModalTitle">选择关卡</h2>
+      <p class="level-legend">✓ 已完成　★ 完美</p>
+      <div class="level-grid" id="levelGrid"></div>
+      <div class="actions"><button class="btn" data-close>关闭</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h2 id="confirmTitle">确定吗？</h2>
+      <p id="confirmText"></p>
+      <div class="actions">
+        <button class="btn" data-close>取消</button>
+        <button class="btn primary" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>玩法说明</h2>
+      <ul>
+        <li>用路径把每一对<b>相同颜色（相同数字）</b>的端点连起来，并<b>铺满所有格子</b>即过关。</li>
+        <li>从端点或已有路径上按下并拖动画线，只能上下左右走；拖回去可以回退。</li>
+        <li>路径不能交叉：画到别的路径上会把它截断；手指退回来，被截断的部分会恢复。</li>
+        <li>「撤销」回到上一次松手前；「提示」直接画出一条正确路径。</li>
+        <li>连续画同一种颜色只算 1 步；步数等于颜色数且没用提示，就是完美通关 ★。</li>
+        <li>每关都只有唯一解。电脑上：Z 撤销、H 提示、R 重来、← → 切换关卡。</li>
+      </ul>
+      <div class="actions"><button class="btn primary" data-close>知道了</button></div>
+    </div>
+  </div>
+</body>
+</html>

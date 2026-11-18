@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 300" width="660" height="300" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <rect width="660" height="300" fill="#ffffff"/>
+  <defs>
+    <g id="grid">
+      <rect width="176" height="176" rx="10" fill="#111827"/>
+      <path d="M44 0V176M88 0V176M132 0V176M0 44H176M0 88H176M0 132H176" stroke="#374151"/>
+    </g>
+    <g id="ends" font-size="14" font-weight="700" text-anchor="middle">
+      <circle cx="22" cy="22" r="14" fill="#ef4444"/><text x="22" y="27" fill="#fff">1</text>
+      <circle cx="154" cy="154" r="14" fill="#ef4444"/><text x="154" y="159" fill="#fff">1</text>
+      <circle cx="22" cy="110" r="14" fill="#3b82f6"/><text x="22" y="115" fill="#fff">2</text>
+      <circle cx="154" cy="66" r="14" fill="#3b82f6"/><text x="154" y="71" fill="#fff">2</text>
+    </g>
+  </defs>
+
+  <!-- step 1: cut -->
+  <g transform="translate(20 40)">
+    <use href="#grid"/>
+    <path d="M22 110H110V66H154" fill="none" stroke="#3b82f6" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" opacity="0.35" stroke-dasharray="2 6"/>
+    <path d="M22 110H66" fill="none" stroke="#3b82f6" stroke-width="15" stroke-linecap="round"/>
+    <path d="M22 22H110V110" fill="none" stroke="#ef4444" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+    <use href="#ends"/>
+    <circle cx="110" cy="110" r="40" fill="#ef4444" opacity="0.25"/>
+  </g>
+  <text x="108" y="28" font-size="14" font-weight="700" text-anchor="middle" fill="#111827">1. 1 号色拖进 2 号色的路径</text>
+  <text x="108" y="240" font-size="12" text-anchor="middle" fill="#4b5563">2 号色从被占的格子起剪断，</text>
+  <text x="108" y="258" font-size="12" text-anchor="middle" fill="#4b5563">只保留起点一侧（虚线为被剪部分）</text>
+
+  <!-- step 2: back out, restored -->
+  <g transform="translate(242 40)">
+    <use href="#grid"/>
+    <path d="M22 110H110V66H154" fill="none" stroke="#3b82f6" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22 22H110" fill="none" stroke="#ef4444" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+    <use href="#ends"/>
+    <circle cx="110" cy="22" r="40" fill="#ef4444" opacity="0.25"/>
+  </g>
+  <text x="330" y="28" font-size="14" font-weight="700" text-anchor="middle" fill="#111827">2. 同一次拖动中退回来</text>
+  <text x="330" y="240" font-size="12" text-anchor="middle" fill="#4b5563">手指离开 2 号色的格子，</text>
+  <text x="330" y="258" font-size="12" text-anchor="middle" fill="#4b5563">被剪掉的部分自动恢复</text>
+
+  <!-- step 3: connected and released -->
+  <g transform="translate(464 40)">
+    <use href="#grid"/>
+    <path d="M22 110H66" fill="none" stroke="#3b82f6" stroke-width="15" stroke-linecap="round"/>
+    <path d="M22 22H110V154H154" fill="none" stroke="#ef4444" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+    <use href="#ends"/>
+    <circle cx="154" cy="154" r="20" fill="none" stroke="#ef4444" stroke-width="3" opacity="0.6"/>
+  </g>
+  <text x="552" y="28" font-size="14" font-weight="700" text-anchor="middle" fill="#111827">3. 连通后松手</text>
+  <text x="552" y="240" font-size="12" text-anchor="middle" fill="#4b5563">1 号色连通（端点回弹 + 光环），</text>
+  <text x="552" y="258" font-size="12" text-anchor="middle" fill="#4b5563">截断生效，2 号色需要重画</text>
+</svg>
