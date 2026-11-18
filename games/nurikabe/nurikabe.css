@@ -1,0 +1,293 @@
+/* 重新开始按钮放在左侧，两侧各两个按钮，标题无需补宽即可居中 */
+.topbar:has(#restartBtn) h1 {
+  padding-left: 0;
+}
+
+.controls-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 4px 16px 0;
+}
+
+/* 状态栏：题号 / 黑格进度 / 计时 */
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--border);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 76px;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 9px;
+  background: var(--bg-elev);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.chip svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-dim);
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: #1e293b;
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.6);
+}
+
+/* 棋盘区域 */
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  padding: 10px;
+}
+
+/* 所有尺寸以格子边长 --s 为基准，--s 由脚本按可用空间计算 */
+.board {
+  --s: 48px;
+  display: grid;
+  grid-template-columns: repeat(var(--n, 5), var(--s));
+  grid-auto-rows: var(--s);
+  gap: 1px;
+  flex-shrink: 0;
+  margin: auto;
+  padding: 2px;
+  border-radius: 8px;
+  background: #94a3b8;
+  box-shadow: 0 0 0 2px #64748b, var(--shadow);
+  touch-action: none;
+  transition: box-shadow 0.4s ease;
+}
+
+.cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: #f8fafc;
+  color: #111827;
+  font-size: calc(var(--s) * 0.55);
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.08s ease;
+}
+
+.cell[data-s="n"] {
+  background: #ffffff;
+  cursor: default;
+}
+
+.cell[data-s="b"] {
+  background: #1e293b;
+}
+
+.cell[data-s="d"]::after {
+  content: "";
+  width: max(5px, calc(var(--s) * 0.2));
+  height: max(5px, calc(var(--s) * 0.2));
+  border-radius: 50%;
+  background: #64748b;
+}
+
+/* 违规 */
+.cell.bad[data-s="b"] {
+  background: #b91c1c;
+  box-shadow: inset 0 0 0 max(2px, calc(var(--s) * 0.06)) #fca5a5;
+}
+
+.cell.bad[data-s="n"] {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.cell.bad[data-s="d"]::after {
+  background: #dc2626;
+}
+
+.cell.focus {
+  z-index: 1;
+  outline: 2px solid #6366f1;
+  outline-offset: -2px;
+}
+
+/* 完成后：白格统一显示白点，棋盘发光 */
+.board.won {
+  box-shadow: 0 0 0 2px #22c55e, 0 0 24px rgba(34, 197, 94, 0.45);
+}
+
+.board.won .cell {
+  cursor: default;
+}
+
+.board.won .cell[data-s="e"]::after {
+  content: "";
+  width: max(5px, calc(var(--s) * 0.2));
+  height: max(5px, calc(var(--s) * 0.2));
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+/* 动效 */
+.cell.pop {
+  animation: pop 0.12s ease-out;
+}
+
+@keyframes pop {
+  from { transform: scale(0.82); }
+}
+
+.cell.flash {
+  animation: flash 0.35s ease;
+}
+
+@keyframes flash {
+  50% { filter: brightness(1.4); transform: scale(0.9); }
+}
+
+.cell.glow {
+  animation: glow 0.4s ease backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes glow {
+  50% { background: #15803d; }
+}
+
+/* 底部工具栏 */
+.controls {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 6px 16px calc(var(--safe-bottom) + 14px);
+}
+
+.tool {
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.tool svg {
+  width: 24px;
+  height: 24px;
+}
+
+.tool:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.tool:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* 结果弹窗 */
+.result-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 10px;
+}
+
+.result-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.record {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 12px;
+  border-radius: 99px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 700;
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) 0.2s backwards;
+}
+
+.record[hidden] {
+  display: none;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.stats div {
+  padding: 10px 4px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.stats b {
+  display: block;
+  font-size: 17px;
+}
+
+.stats span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* 玩法说明中的设置 */
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.setting .segmented {
+  width: 132px;
+}
+
+.setting .segmented button {
+  min-height: 34px;
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell.pop,
+  .cell.flash,
+  .cell.glow {
+    animation: none;
+  }
+}
