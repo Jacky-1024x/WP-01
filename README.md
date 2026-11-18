@@ -28,7 +28,8 @@ H5-Game/
 │   └── home.css            # 主页样式
 ├── js/
 │   ├── games.js            # 游戏清单（唯一数据源，主页与 sw.js 共用）
-│   ├── home.js             # 主页渲染
+│   ├── home.js             # 主页渲染（按本机点击记录排序）
+│   ├── usage.js            # 入口点击次数 / 最后点击时间的记录与排序规则
 │   ├── pwa.js              # 共享工具：注册 SW、屏蔽缩放手势、localStorage、toast
 │   └── sfx.js              # 通用音效（Web Audio 实时合成）与音效开关
 ├── games/
@@ -80,7 +81,7 @@ H5-Game/
 ├── icons/                  # SVG 源图标与生成的 PNG（180 / 192 / 512）
 ├── scripts/gen-icons.sh    # 从 icons/icon.svg 生成 PNG 图标
 ├── scripts/gen-sudoku-bank.mjs  # 重新生成数独内置题库
-├── tests/smoke.mjs         # 冒烟测试（华容道可解性、五子棋 AI、21 点规则与结算、密码灯规则、数独出题与对局逻辑、扫雷规则、俄罗斯方块规则）
+├── tests/smoke.mjs         # 冒烟测试（华容道可解性、五子棋 AI、21 点规则与结算、密码灯规则、数独出题与对局逻辑、扫雷规则、俄罗斯方块规则、主页排序）
 └── package.json            # 仅用于声明 ES module 与快捷脚本，无任何依赖
 ```
 
@@ -140,6 +141,7 @@ GitHub Pages 自带 HTTPS，满足 PWA 要求。
    ```
 
    主页会自动出现新卡片，Service Worker 也会自动预缓存 `files` 中列出的文件。
+   主页按本机记录的点击次数（多的在前）和最近点击时间排序；从没点过的游戏按 `H5_GAMES` 中的顺序排在最后。
 3. **修改 `sw.js` 顶部的 `VERSION`**（例如 `v1.0.0` → `v1.1.0`）。Service Worker 采用缓存优先策略，每次发布任何改动都要更新版本号，用户下次打开时才会拿到新版本（新版本接管后页面会自动刷新一次）。
 
 ## 音效

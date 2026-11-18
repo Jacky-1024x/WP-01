@@ -1,6 +1,6 @@
 // 离线缓存：安装时预缓存全部静态资源，之后缓存优先。
 // 发布新版本时请修改 VERSION，旧缓存会在激活时被清理。
-const VERSION = 'v1.9.1';
+const VERSION = 'v1.10.0';
 const CACHE = `h5-game-${VERSION}`;
 
 importScripts('js/games.js');
@@ -15,6 +15,7 @@ const CORE = [
   'js/home.js',
   'js/pwa.js',
   'js/sfx.js',
+  'js/usage.js',
   'icons/icon.svg',
   'icons/icon-180.png',
   'icons/icon-192.png',

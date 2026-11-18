@@ -12,6 +12,7 @@ import * as sdGen from '../games/sudoku/generator.js';
 import * as sd from '../games/sudoku/board.js';
 import { BANK as SD_BANK } from '../games/sudoku/puzzles.js';
 import * as tt from '../games/tetris/engine.js';
+import { recordClick, sortByUsage } from '../js/usage.js';
 
 let passed = 0;
 function test(name, fn) {
@@ -1533,6 +1534,29 @@ test('存档还原：还原后继续对局结果完全一致；篡改或不一�
   blocked.fill('1', (save.piece.y + tt.BUFFER) * tt.COLS, (save.piece.y + tt.BUFFER + 4) * tt.COLS);
   assert.equal(tt.restoreGame({ ...save, board: blocked.join('') }), null, '当前方块与场地重叠');
   assert.equal(tt.restoreGame({ ...save, piece: null, clearing: { rows: [19], t: 0 } }), null, '消行的行没填满');
+});
+
+console.log('主页排序');
+
+test('入口按点击次数从多到少排；次数相同按最近点击；没点过的保持原顺序排在最后', () => {
+  const games = ['a', 'b', 'c', 'd', 'e'].map((id) => ({ id }));
+  const order = (usage) => sortByUsage(games, usage).map((g) => g.id).join('');
+  assert.equal(order({}), 'abcde');
+  assert.equal(order(null), 'abcde');
+  let u = {};
+  u = recordClick(u, 'd', 100);
+  u = recordClick(u, 'b', 200);
+  u = recordClick(u, 'd', 300);
+  assert.deepEqual(u.d, { count: 2, last: 300 });
+  assert.equal(order(u), 'dbace');
+  u = recordClick(u, 'e', 400);
+  assert.equal(order(u), 'debac', '次数相同时最近点过的在前');
+  u = recordClick(u, 'b', 500);
+  u = recordClick(u, 'b', 600);
+  assert.equal(order(u), 'bdeac');
+  assert.equal(order({ ...u, zzz: { count: 99, last: 1 } }), 'bdeac', '已删除的游戏记录被忽略');
+  assert.equal(order({ a: { count: 'x', last: 1 }, c: { count: 1 } }), 'abcde', '损坏的记录视为没点过');
+  assert.deepEqual(recordClick({ a: { count: -3 } }, 'a', 7).a, { count: 1, last: 7 });
 });
 
 console.log(`\n全部 ${passed} 项通过`);
