@@ -1,0 +1,258 @@
+/* 重新开始按钮放在左侧，两侧各两个按钮，标题无需补宽即可居中 */
+.topbar:has(#restartBtn) h1 {
+  padding-left: 0;
+}
+
+.controls-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 4px 16px 0;
+}
+
+#sizeSelect button {
+  padding: 0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* 状态栏：步数 / 最少步数 / 用时 */
+.status {
+  display: flex;
+  padding: 6px 4px;
+  border-radius: 14px;
+  background: var(--border);
+}
+
+.stat {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.stat + .stat {
+  border-left: 1px solid var(--border);
+}
+
+.stat b {
+  font-size: 18px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat b span {
+  font-size: inherit;
+}
+
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+}
+
+/* 棋盘内所有尺寸都以灯格边长 --s 为基准，--s 由脚本按可用空间计算 */
+.board {
+  --s: 56px;
+  --n: 5;
+  display: grid;
+  grid-template-columns: repeat(var(--n), var(--s));
+  gap: calc(var(--s) * 0.12);
+  padding: calc(var(--s) * 0.25);
+  border-radius: calc(var(--s) * 0.4);
+  background: #111827;
+  box-shadow: 0 0 0 1px var(--border), var(--shadow);
+  transition: opacity 0.2s ease;
+}
+
+.board.switching {
+  opacity: 0;
+}
+
+.cell {
+  --c: #1f2937;
+  position: relative;
+  width: var(--s);
+  height: var(--s);
+  padding: 0;
+  border: 1.5px solid #374151;
+  border-radius: calc(var(--s) * 0.16);
+  background: var(--c);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.board.over .cell {
+  cursor: default;
+}
+
+.cell[data-on] {
+  --c: #facc15;
+  border-color: transparent;
+  box-shadow: 0 0 calc(var(--s) * 0.25) color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+/* 灯面高光 */
+.cell::after {
+  content: "";
+  position: absolute;
+  left: 14%;
+  top: 12%;
+  width: 38%;
+  height: 12%;
+  border-radius: 99px;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.cell[data-on]::after {
+  opacity: 0.4;
+}
+
+.cell.focus {
+  outline-color: #818cf8;
+}
+
+/* 提示：下一步该点的灯 */
+.cell.hint {
+  outline: 2.5px dashed #fff;
+  animation: hint-blink 0.8s ease-in-out infinite;
+}
+
+@keyframes hint-blink {
+  50% { outline-color: rgba(255, 255, 255, 0.25); }
+}
+
+.cell.pop {
+  animation: pop 0.12s ease-out;
+}
+
+@keyframes pop {
+  50% { transform: scale(0.9); }
+}
+
+.cell.flash {
+  animation: flash 0.32s ease-out var(--d, 0ms) backwards;
+}
+
+@keyframes flash {
+  40% { background: #fde68a; box-shadow: 0 0 calc(var(--s) * 0.4) rgba(250, 204, 21, 0.8); transform: scale(1.06); }
+}
+
+/* 底部控制区 */
+.controls {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 4px 16px calc(var(--safe-bottom) + 14px);
+}
+
+.controls-row {
+  display: flex;
+  gap: 10px;
+}
+
+.controls-row[hidden] {
+  display: none;
+}
+
+.ctrl-btn {
+  flex: 1;
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--text) 8%, var(--bg));
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.ctrl-btn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.4;
+}
+
+.ctrl-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.ctrl-btn em {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.again-btn {
+  width: 100%;
+  min-height: 56px;
+  font-size: 18px;
+}
+
+.again-btn[hidden] {
+  display: none;
+}
+
+/* 结果弹窗 */
+.record {
+  display: inline-block;
+  margin: 4px 0;
+  padding: 2px 12px;
+  border-radius: 99px;
+  background: #facc15;
+  color: #111827;
+  font-weight: 700;
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.record[hidden] {
+  display: none;
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.stats div {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 12px;
+  background: var(--border);
+}
+
+.stats b {
+  display: block;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats span {
+  font-size: 12px;
+  color: var(--text-dim);
+}

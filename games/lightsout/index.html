@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>关灯 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="lightsout.css">
+  <script type="module" src="lightsout.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <button class="icon-btn" id="restartBtn" aria-label="换一题">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1>关灯</h1>
+      <button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="controls-top">
+      <div class="segmented" id="sizeSelect" role="group" aria-label="尺寸">
+        <button data-size="3">3×3</button>
+        <button data-size="4">4×4</button>
+        <button data-size="5">5×5</button>
+        <button data-size="6">6×6</button>
+        <button data-size="7">7×7</button>
+      </div>
+      <div class="status">
+        <div class="stat"><span>步数</span><b id="moves">0</b></div>
+        <div class="stat"><span>最少</span><b><span id="optimal">0</span> 步</b></div>
+        <div class="stat"><span>用时</span><b id="timer">00:00</b></div>
+      </div>
+    </div>
+
+    <main class="board-wrap" id="boardWrap">
+      <div class="board" id="board" role="grid" aria-label="棋盘"></div>
+    </main>
+
+    <div class="controls">
+      <div class="controls-row" id="playControls">
+        <button class="ctrl-btn" id="undoBtn" data-sfx="none" aria-label="撤销">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          <span>撤销</span>
+        </button>
+        <button class="ctrl-btn" id="resetBtn" data-sfx="none" aria-label="重来">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>重来</span>
+        </button>
+        <button class="ctrl-btn" id="hintBtn" data-sfx="none" aria-label="提示">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>提示<em id="hintCount" hidden></em></span>
+        </button>
+      </div>
+      <button class="btn primary again-btn" id="againBtn" hidden>再来一局</button>
+    </div>
+  </div>
+
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal-card">
+      <h2 id="resultTitle"></h2>
+      <p id="resultDetail"></p>
+      <div class="record" id="resultRecord" hidden>新纪录！</div>
+      <div class="stats" id="resultStats"></div>
+      <div class="actions">
+        <button class="btn" id="resultClose">查看棋盘</button>
+        <button class="btn primary" id="resultAgain">再来一局</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h2>放弃本局？</h2>
+      <p id="confirmText"></p>
+      <div class="actions">
+        <button class="btn" data-close>取消</button>
+        <button class="btn primary" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>玩法说明</h2>
+      <ul>
+        <li>点一盏灯，它和<b>上下左右</b>相邻的灯都会翻转（亮变灭、灭变亮）。</li>
+        <li>把<b>所有灯都关掉</b>就赢了。每道题都有解，状态栏显示本题最少几步。</li>
+        <li>同一盏灯点两次等于没点，点击的先后顺序不影响结果。</li>
+        <li>「撤销」退一步，「重来」回到本题开头，「提示」标出下一步该点的灯。</li>
+        <li>不用提示、步数等于最少步数即为<b>完美通关</b>。</li>
+        <li>电脑上：方向键 + 空格点灯，Z 撤销，R 重来，H 提示，N 换一题。</li>
+      </ul>
+      <div class="actions"><button class="btn primary" data-close>知道了</button></div>
+    </div>
+  </div>
+</body>
+</html>
