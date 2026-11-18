@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>数织 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="nonogram.css">
+  <script type="module" src="nonogram.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <button class="icon-btn" id="libraryBtn" aria-label="题库">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" fill="currentColor"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" fill="currentColor"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <h1>数织</h1>
+      <button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="controls-top">
+      <div class="segmented" id="sizeSelect" role="group" aria-label="尺寸">
+        <button data-size="5">5×5</button>
+        <button data-size="10">10×10</button>
+        <button data-size="15">15×15</button>
+      </div>
+      <div class="status">
+        <span class="title" id="puzzleTitle"></span>
+        <span class="timer" id="timer">00:00</span>
+      </div>
+    </div>
+
+    <main class="board-wrap" id="boardWrap">
+      <div class="puzzle" id="puzzle">
+        <div class="corner"><canvas id="preview" aria-hidden="true"></canvas></div>
+        <div class="col-clues" id="colClues"></div>
+        <div class="row-clues" id="rowClues"></div>
+        <div class="grid" id="grid" role="grid" aria-label="棋盘"></div>
+      </div>
+      <button class="zoom-btn" id="zoomBtn" data-sfx="select" aria-label="放大" aria-pressed="false" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5 20 20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M7.5 10.5h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path class="zoom-v" d="M10.5 7.5v6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </button>
+    </main>
+
+    <div class="controls">
+      <button class="tool-btn" id="undoBtn" data-sfx="none" aria-label="撤销">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H6V4M6.5 7.5A7.5 7.5 0 1 1 5 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="segmented tool-select" id="toolSelect" role="group" aria-label="笔">
+        <button data-tool="fill"><i class="tool-icon fill" aria-hidden="true"></i>涂黑</button>
+        <button data-tool="cross"><i class="tool-icon cross" aria-hidden="true"></i>打叉</button>
+      </div>
+      <button class="tool-btn" id="restartBtn" aria-label="重新开始本题">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal-card">
+      <div class="result-art" id="resultArt"></div>
+      <h2>完成！</h2>
+      <p class="result-name" id="resultName"></p>
+      <p id="resultDetail"></p>
+      <div class="record" id="resultRecord" hidden>新纪录！</div>
+      <div class="stats" id="resultStats"></div>
+      <div class="actions">
+        <button class="btn" id="resultClose">查看图案</button>
+        <button class="btn primary" id="resultNext">下一题</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="libraryModal" hidden>
+    <div class="modal-card library">
+      <h2 id="libraryTitle">题库</h2>
+      <p class="library-sub" id="librarySub"></p>
+      <div class="library-list" id="libraryList"></div>
+      <div class="actions">
+        <button class="btn" data-close>关闭</button>
+        <button class="btn primary" id="randomBtn">随机一题</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h2 id="confirmTitle"></h2>
+      <p id="confirmText"></p>
+      <div class="actions">
+        <button class="btn" data-close>取消</button>
+        <button class="btn primary" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>玩法说明</h2>
+      <ul>
+        <li>行左侧、列上方的数字表示这一行（列）里<b>连续涂黑的格子</b>分成几段、每段多长，段与段之间至少隔一格。</li>
+        <li>根据数字推理，把该涂的格子全部涂黑，就会拼出一幅图。</li>
+        <li>底部切换「涂黑 / 打叉」。打叉表示“这里一定是空白”，只是记号，不打也能完成。</li>
+        <li>按住格子<b>拖动</b>可沿一行或一列连续操作；用同一种笔点已标记的格子可以擦除。</li>
+        <li>某行（列）的标记与数字对上后，数字会变灰。</li>
+        <li>每道题都只有唯一解，而且不需要猜。</li>
+        <li>10×10、15×15 可用棋盘右下角按钮或双指捏合放大，放大后在棋盘区域拖动查看；格子上仍可拖动连涂。</li>
+        <li>电脑上：左键用当前笔，右键用另一种笔；方向键 + 空格 / F / X 也可以操作，Tab 切换笔，Ctrl/⌘ + Z 撤销。</li>
+      </ul>
+      <div class="actions"><button class="btn primary" data-close>知道了</button></div>
+    </div>
+  </div>
+</body>
+</html>

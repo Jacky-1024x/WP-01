@@ -1,0 +1,563 @@
+:root {
+  --ng-cell: #ffffff;
+  --ng-thin: #d1d5db;
+  --ng-thick: #6b7280;
+  --ng-frame: #111827;
+  --ng-fill: #4338ca;
+  --ng-cross: #9ca3af;
+  --ng-clue-bg: #eceefb;
+  --ng-clue: #111827;
+  --ng-hl: #eef0ff;
+  --ng-clue-hl: #c7d2fe;
+  --ng-btn: #e5e7f0;
+  --i-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 5l14 14M19 5 5 19' stroke='%23000' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ng-cell: #1f2937;
+    --ng-thin: #374151;
+    --ng-thick: #6b7280;
+    --ng-frame: #9ca3af;
+    --ng-fill: #a5b4fc;
+    --ng-cross: #6b7280;
+    --ng-clue-bg: #161b26;
+    --ng-clue: #e5e7eb;
+    --ng-hl: rgba(129, 140, 248, 0.12);
+    --ng-clue-hl: rgba(129, 140, 248, 0.35);
+    --ng-btn: #252b38;
+  }
+}
+
+/* 题库按钮放在左侧，两侧各两个按钮，标题无需补宽即可居中 */
+.topbar:has(#libraryBtn) h1 {
+  padding-left: 0;
+}
+
+.controls-top {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 4px 16px 0;
+  flex-shrink: 0;
+}
+
+/* 状态栏：题号与名称 / 计时 */
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  padding: 0 4px;
+}
+
+.status .title {
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status .title small {
+  margin-left: 6px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status .timer {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- 棋盘 */
+.board-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: auto;
+  padding: 8px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  scrollbar-width: thin;
+}
+
+.zoom-btn {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.zoom-btn[hidden] {
+  display: none;
+}
+
+.zoom-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.zoom-btn[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--primary), var(--shadow);
+}
+
+.zoom-btn[aria-pressed="true"] .zoom-v {
+  display: none;
+}
+
+/* 所有尺寸由脚本按可用空间计算：--s 格子边长，--sw / --sh 单个提示数字的宽 / 高，--rw / --ch 提示区宽 / 高 */
+.puzzle {
+  --s: 32px;
+  --sw: 16px;
+  --sw2: 24px;
+  --sh: 16px;
+  --rw: 60px;
+  --ch: 60px;
+  --fs: 14px;
+  --art: var(--ng-fill);
+  display: grid;
+  grid-template-columns: var(--rw) auto;
+  grid-template-rows: var(--ch) auto;
+  flex-shrink: 0;
+  margin: auto;
+}
+
+.corner {
+  display: grid;
+  place-items: center;
+  border-radius: 12px 0 0 0;
+}
+
+.corner canvas {
+  display: block;
+}
+
+.col-clues,
+.row-clues {
+  display: grid;
+  background: var(--ng-clue-bg);
+  font-size: var(--fs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ng-clue);
+  line-height: 1;
+  transition: opacity 0.4s ease;
+}
+
+.col-clues {
+  grid-template-columns: repeat(var(--w), var(--s));
+  border-radius: 10px 10px 0 0;
+  padding-bottom: 3px;
+}
+
+.row-clues {
+  grid-template-rows: repeat(var(--h), var(--s));
+  border-radius: 10px 0 0 10px;
+  padding-right: 4px;
+}
+
+.cc,
+.rc {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  transition: background-color 0.1s ease;
+}
+
+.cc {
+  flex-direction: column;
+}
+
+.cc.v5 {
+  box-shadow: inset -1px 0 0 var(--ng-thin);
+}
+
+.rc.h5 {
+  box-shadow: inset 0 -1px 0 var(--ng-thin);
+}
+
+.cc span {
+  height: var(--sh);
+  display: grid;
+  place-items: center;
+}
+
+.rc span {
+  width: var(--sw);
+  text-align: center;
+}
+
+.rc span.w2 {
+  width: var(--sw2);
+}
+
+/* 列宽只有一格，两位数在小格子里略微收紧字距 */
+.cc span.w2 {
+  letter-spacing: -0.06em;
+}
+
+.cc span.done,
+.rc span.done {
+  opacity: 0.3;
+}
+
+.cc.hl,
+.rc.hl {
+  background: var(--ng-clue-hl);
+}
+
+.cc.lit span,
+.rc.lit span {
+  animation: clue-lit 0.45s ease;
+}
+
+@keyframes clue-lit {
+  40% { transform: scale(1.35); color: var(--primary); opacity: 1; }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--w), var(--s));
+  grid-auto-rows: var(--s);
+  background: var(--ng-cell);
+  box-shadow: 0 0 0 2px var(--ng-frame);
+  touch-action: none;
+  cursor: pointer;
+  transition: box-shadow 0.5s ease;
+}
+
+.cell {
+  --vr: 1px;
+  --vc: var(--ng-thin);
+  --hb: 1px;
+  --hc: var(--ng-thin);
+  position: relative;
+  background: var(--ng-cell);
+  box-shadow: inset calc(-1 * var(--vr)) 0 0 var(--vc), inset 0 calc(-1 * var(--hb)) 0 var(--hc);
+}
+
+.cell.v5 {
+  --vr: 2px;
+  --vc: var(--ng-thick);
+}
+
+.cell.h5 {
+  --hb: 2px;
+  --hc: var(--ng-thick);
+}
+
+.cell.last-x {
+  --vr: 0px;
+}
+
+.cell.last-y {
+  --hb: 0px;
+}
+
+.cell.hl {
+  background: var(--ng-hl);
+}
+
+.cell[data-v="1"]::before,
+.cell[data-v="2"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 var(--vr) var(--hb) 0;
+}
+
+.cell[data-v="1"]::before {
+  background: var(--ng-fill);
+}
+
+.cell[data-v="2"]::before {
+  inset: 24% calc(24% + var(--vr) / 2) calc(24% + var(--hb) / 2) 24%;
+  background: var(--ng-cross);
+  -webkit-mask: var(--i-cross) center / 100% no-repeat;
+  mask: var(--i-cross) center / 100% no-repeat;
+}
+
+.cell.focus {
+  z-index: 1;
+  outline: 2px solid #818cf8;
+  outline-offset: -1px;
+}
+
+/* 动效 */
+.cell.pop::before {
+  animation: cell-pop 0.12s ease-out;
+}
+
+@keyframes cell-pop {
+  from { transform: scale(0.7); opacity: 0.4; }
+}
+
+.cell.flash {
+  animation: cell-flash 0.35s ease;
+}
+
+@keyframes cell-flash {
+  40% { background: var(--ng-clue-hl); }
+}
+
+/* 完成：图案上色，格线、打叉与提示淡去 */
+.puzzle.won .grid {
+  box-shadow: 0 0 0 2px var(--art), 0 0 24px color-mix(in srgb, var(--art) 45%, transparent);
+  cursor: default;
+}
+
+.puzzle.won .cell {
+  background: var(--ng-cell);
+  box-shadow: none;
+  transition: box-shadow 0.4s ease;
+}
+
+.puzzle.won .cell[data-v="1"]::before {
+  inset: 0;
+}
+
+.puzzle.won .cell[data-v="2"]::before {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.puzzle.won .cell.art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--art);
+  animation: art-in 0.3s ease backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes art-in {
+  from { background: var(--ng-fill); transform: scale(0.6); }
+}
+
+.puzzle.won .col-clues,
+.puzzle.won .row-clues {
+  opacity: 0.25;
+}
+
+/* ---------------------------------------------------------------- 底部工具栏 */
+.controls {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 6px 16px calc(var(--safe-bottom) + 14px);
+  flex-shrink: 0;
+}
+
+.tool-select {
+  flex: 1;
+}
+
+.tool-select button {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.tool-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+}
+
+.tool-icon.fill {
+  background: var(--ng-fill);
+}
+
+.tool-icon.cross {
+  background: var(--text-dim);
+  -webkit-mask: var(--i-cross) center / 100% no-repeat;
+  mask: var(--i-cross) center / 100% no-repeat;
+}
+
+.tool-btn {
+  width: 58px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: var(--border);
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.tool-btn:active {
+  transform: scale(0.94);
+}
+
+.tool-btn:disabled {
+  opacity: 0.4;
+  transform: none;
+  cursor: default;
+}
+
+.tool-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* ---------------------------------------------------------------- 弹窗 */
+.result-art {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.art {
+  display: block;
+  border-radius: 8px;
+  background: var(--ng-cell);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.result-art .art {
+  width: 132px;
+  height: 132px;
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) 0.1s backwards;
+}
+
+.modal-card p.result-name {
+  margin: 0;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.record {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 12px;
+  border-radius: 99px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 700;
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) 0.2s backwards;
+}
+
+.record[hidden] {
+  display: none;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.stats div {
+  padding: 10px 4px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.stats b {
+  display: block;
+  font-size: 17px;
+}
+
+.stats span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* 题库 */
+.modal-card.library {
+  width: min(400px, 100%);
+}
+
+.modal-card p.library-sub {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.library-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.lib-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.lib-card[aria-current="true"] {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg-elev));
+}
+
+.lib-card .art,
+.lib-card .unknown {
+  width: 56px;
+  height: 56px;
+}
+
+.lib-card .unknown {
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background:
+    linear-gradient(var(--border) 1px, transparent 1px) 0 0 / 11.2px 11.2px,
+    linear-gradient(90deg, var(--border) 1px, transparent 1px) 0 0 / 11.2px 11.2px,
+    var(--bg-elev);
+  color: var(--text-dim);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.lib-card b {
+  font-size: 13px;
+}
+
+.lib-card small {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell.pop::before,
+  .cell.flash,
+  .cc.lit span,
+  .rc.lit span,
+  .puzzle.won .cell.art::before {
+    animation: none;
+  }
+}
