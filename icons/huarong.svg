@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b45309"/>
+      <stop offset="1" stop-color="#7c2d12"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="22" fill="url(#g)"/>
+  <rect x="21" y="10" width="54" height="67" rx="6" fill="#fef3c7"/>
+  <rect x="21" y="10" width="54" height="67" rx="6" fill="none" stroke="#451a03" stroke-width="3"/>
+  <rect x="35" y="74" width="26" height="6" fill="#fef3c7"/>
+  <g stroke-width="0">
+    <rect x="24.5" y="13.5" width="10" height="23" rx="3" fill="#4f46e5"/>
+    <rect x="61.5" y="13.5" width="10" height="23" rx="3" fill="#4f46e5"/>
+    <rect x="37" y="13.5" width="22" height="23" rx="4" fill="#dc2626"/>
+    <rect x="24.5" y="39" width="10" height="23" rx="3" fill="#4f46e5"/>
+    <rect x="61.5" y="39" width="10" height="23" rx="3" fill="#4f46e5"/>
+    <rect x="37" y="39" width="22" height="10.5" rx="3" fill="#16a34a"/>
+    <rect x="37" y="52" width="10" height="10" rx="3" fill="#f59e0b"/>
+    <rect x="49" y="52" width="10" height="10" rx="3" fill="#f59e0b"/>
+    <rect x="24.5" y="64.5" width="10" height="10" rx="3" fill="#f59e0b"/>
+    <rect x="61.5" y="64.5" width="10" height="10" rx="3" fill="#f59e0b"/>
+  </g>
+  <text x="48" y="30.5" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">曹</text>
+  <path d="M42 84l6 5 6-5" fill="none" stroke="#fef3c7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

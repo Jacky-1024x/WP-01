@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>华容道 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="huarong.css">
+  <script type="module" src="huarong.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <h1>华容道</h1>
+      <button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="controls-top">
+      <div class="level-bar">
+        <button class="icon-btn" id="prevBtn" aria-label="上一关">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="level-name" id="levelBtn" aria-label="选关">
+          <span id="levelNo">第 1 关</span><b id="levelName"></b>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-btn" id="nextBtn" aria-label="下一关">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="label">步数</span><span class="value" id="moves">0</span></div>
+        <div class="stat"><span class="label">最少</span><span class="value" id="min">0</span><span class="sub" id="best">未通关</span></div>
+        <div class="stat"><span class="label">用时</span><span class="value" id="time">00:00</span></div>
+      </div>
+    </div>
+
+    <main class="board-wrap" id="boardWrap">
+      <div class="board" id="board" aria-label="棋盘">
+        <div class="board-inner" id="inner"></div>
+        <span class="exit-label" aria-hidden="true">出口</span>
+      </div>
+    </main>
+
+    <div class="controls-bottom">
+      <button class="btn" id="undoBtn" data-sfx="none">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        撤销
+      </button>
+      <button class="btn" id="restartBtn">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        重来
+      </button>
+      <button class="btn primary" id="hintBtn" data-sfx="none">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="hintText">提示</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal" id="winModal" hidden>
+    <div class="modal-card">
+      <h2 id="winTitle">曹操逃出华容道！</h2>
+      <p id="winDetail"></p>
+      <div class="record" id="winRecord" hidden></div>
+      <p class="note" id="winNote" hidden>本局使用了提示，不刷新最佳成绩</p>
+      <div class="actions">
+        <button class="btn" id="winLevels">选关</button>
+        <button class="btn" id="winAgain">再玩一次</button>
+        <button class="btn primary" id="winNext">下一关</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h2>重新开始本关吗？</h2>
+      <p>当前进度会被清空。</p>
+      <div class="actions">
+        <button class="btn" data-close>取消</button>
+        <button class="btn primary" id="confirmOk">重来</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="levelModal" hidden>
+    <div class="modal-card levels-card">
+      <h2>选关</h2>
+      <p id="levelSummary"></p>
+      <div class="levels" id="levelList"></div>
+      <div class="actions"><button class="btn" data-close>关闭</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>玩法说明</h2>
+      <ul>
+        <li>移动棋子，让<b>曹操</b>（红色大方块）走到底部正中，从出口逃出即胜。</li>
+        <li>棋子只能平移到空格里，不能旋转、不能跳过别的棋子。</li>
+        <li><b>拖动</b>棋子到想去的位置；也可以轻点：只有一个去处时直接走，有多个去处时点虚线框。</li>
+        <li><b>计步</b>：同一枚棋子的一次连续移动算 1 步，走几格、拐几个弯都一样；连着移动同一枚棋子也只算 1 步。横刀立马最少 81 步就是这么算的。</li>
+        <li>可以无限撤销；「提示」会给出最少步数解法的下一步，但用过提示后不刷新最佳成绩。</li>
+        <li>共 38 个传统布局，按难度排列，全部可玩。新手可以从第 1 关开始。</li>
+        <li>电脑上：Tab 选棋子、方向键移动，Z 撤销，H 提示，[ ] 切换关卡。</li>
+      </ul>
+      <div class="actions"><button class="btn primary" data-close>知道了</button></div>
+    </div>
+  </div>
+</body>
+</html>
