@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 760" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  
+  <rect x="20" y="20" width="360" height="720" rx="36" fill="#f4f5fb" stroke="#d1d5db" stroke-width="2"/>
+  <g transform="translate(20 20)">
+    <path d="M30 42l-8 8 8 8" fill="none" stroke="#111827" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="74" cy="50" r="9" fill="none" stroke="#111827" stroke-width="2.4"/>
+    <text x="180" y="57" font-size="19" font-weight="700" text-anchor="middle" fill="#111827">数回</text>
+    <path d="M276 46h4l6-5v18l-6-5h-4z" fill="#111827"/>
+    <circle cx="326" cy="50" r="10" fill="none" stroke="#111827" stroke-width="2.2"/>
+    <text x="326" y="55" font-size="13" font-weight="700" text-anchor="middle" fill="#111827">?</text>
+    <rect x="16" y="82" width="328" height="48" rx="14" fill="#e5e7eb"/>
+    <rect x="125.33333333333333" y="86" width="105.33333333333333" height="40" rx="10" fill="#ffffff"/>
+    <text x="70.66666666666666" y="112" font-size="14" font-weight="600" text-anchor="middle" fill="#6b7280">简单 5×5</text>
+    <text x="180" y="112" font-size="14" font-weight="700" text-anchor="middle" fill="#111827">中等 7×7</text>
+    <text x="289.3333333333333" y="112" font-size="14" font-weight="600" text-anchor="middle" fill="#6b7280">困难 10×10</text>
+    <rect x="16" y="138" width="328" height="40" rx="14" fill="#e5e7eb"/>
+    <text x="30" y="163" font-size="14" font-weight="600" fill="#6b7280">中等 · 第 1 题</text>
+    <text x="330" y="164" font-size="16" font-weight="700" text-anchor="end" fill="#111827" font-family="ui-monospace, Menlo, monospace">02:17</text>
+  </g>
+  <rect x="36" y="260" width="328" height="328" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="77" y="309.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">2</text>
+  <text x="200" y="309.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">2</text>
+  <text x="323" y="309.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">0</text>
+  <text x="77" y="350.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">1</text>
+  <text x="159" y="350.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">0</text>
+  <text x="200" y="350.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">1</text>
+  <text x="282" y="350.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">1</text>
+  <text x="77" y="391.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">3</text>
+  <text x="200" y="391.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">1</text>
+  <text x="323" y="391.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">1</text>
+  <text x="77" y="432.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">2</text>
+  <text x="118" y="432.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">2</text>
+  <text x="159" y="432.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">2</text>
+  <text x="200" y="473.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">2</text>
+  <text x="77" y="514.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">1</text>
+  <text x="200" y="514.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">3</text>
+  <text x="282" y="514.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">0</text>
+  <text x="77" y="555.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">0</text>
+  <text x="241" y="555.2" font-size="22.55" font-weight="700" text-anchor="middle" fill="#111827">3</text>
+  <line x1="56.5" y1="280.5" x2="97.5" y2="280.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <line x1="97.5" y1="280.5" x2="138.5" y2="280.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <line x1="138.5" y1="280.5" x2="179.5" y2="280.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <line x1="179.5" y1="280.5" x2="220.5" y2="280.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <path d="M236.49 275.99L245.51 285.01M245.51 275.99L236.49 285.01" stroke="#9ca3af" stroke-width="2.46" stroke-linecap="round"/>
+  <path d="M277.49 275.99L286.51 285.01M286.51 275.99L277.49 285.01" stroke="#9ca3af" stroke-width="2.46" stroke-linecap="round"/>
+  <path d="M318.49 275.99L327.51 285.01M327.51 275.99L318.49 285.01" stroke="#9ca3af" stroke-width="2.46" stroke-linecap="round"/>
+  <path d="M72.49 316.99L81.51 326.01M81.51 316.99L72.49 326.01" stroke="#9ca3af" stroke-width="2.46" stroke-linecap="round"/>
+  <line x1="97.5" y1="362.5" x2="138.5" y2="362.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <line x1="220.5" y1="362.5" x2="261.5" y2="362.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <line x1="261.5" y1="362.5" x2="302.5" y2="362.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <line x1="56.5" y1="403.5" x2="97.5" y2="403.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <line x1="179.5" y1="403.5" x2="220.5" y2="403.5" stroke="#4f46e5" stroke-width="5.33" stroke-linecap="round"/>
+  <circle cx="56.5" cy="280.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="97.5" cy="280.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="138.5" cy="280.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="179.5" cy="280.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="220.5" cy="280.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="261.5" cy="280.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="302.5" cy="280.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="343.5" cy="280.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="56.5" cy="321.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="97.5" cy="321.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="138.5" cy="321.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="179.5" cy="321.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="220.5" cy="321.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="261.5" cy="321.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="302.5" cy="321.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="343.5" cy="321.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="56.5" cy="362.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="97.5" cy="362.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="138.5" cy="362.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="179.5" cy="362.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="220.5" cy="362.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="261.5" cy="362.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="302.5" cy="362.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="343.5" cy="362.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="56.5" cy="403.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="97.5" cy="403.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="138.5" cy="403.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="179.5" cy="403.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="220.5" cy="403.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="261.5" cy="403.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="302.5" cy="403.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="343.5" cy="403.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="56.5" cy="444.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="97.5" cy="444.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="138.5" cy="444.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="179.5" cy="444.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="220.5" cy="444.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="261.5" cy="444.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="302.5" cy="444.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="343.5" cy="444.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="56.5" cy="485.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="97.5" cy="485.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="138.5" cy="485.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="179.5" cy="485.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="220.5" cy="485.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="261.5" cy="485.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="302.5" cy="485.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="343.5" cy="485.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="56.5" cy="526.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="97.5" cy="526.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="138.5" cy="526.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="179.5" cy="526.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="220.5" cy="526.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="261.5" cy="526.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="302.5" cy="526.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="343.5" cy="526.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="56.5" cy="567.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="97.5" cy="567.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="138.5" cy="567.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="179.5" cy="567.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="220.5" cy="567.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="261.5" cy="567.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="302.5" cy="567.5" r="2.87" fill="#9ca3af"/>
+  <circle cx="343.5" cy="567.5" r="2.87" fill="#9ca3af"/>
+  <g transform="translate(20 20)">
+    <rect x="16" y="620" width="102.66666666666667" height="56" rx="14" fill="#e5e7eb"/><text x="67.33333333333334" y="655" font-size="14" font-weight="600" text-anchor="middle" fill="#111827">撤销</text>
+    <rect x="128.66666666666669" y="620" width="102.66666666666667" height="56" rx="14" fill="#e5e7eb"/><text x="180.00000000000003" y="655" font-size="14" font-weight="600" text-anchor="middle" fill="#111827">重做</text>
+    <rect x="241.33333333333334" y="620" width="102.66666666666667" height="56" rx="14" fill="#e5e7eb"/><text x="292.6666666666667" y="655" font-size="14" font-weight="600" text-anchor="middle" fill="#111827">清空</text>
+  </g>
+  <path d="M404 70h22" stroke="#4f46e5" stroke-width="1.5"/><circle cx="404" cy="70" r="3" fill="#4f46e5"/><text x="434" y="75" font-size="14" fill="#374151">顶栏：返回 / 新题 / 标题 / 音效 / 玩法说明</text>
+  <path d="M404 126h22" stroke="#4f46e5" stroke-width="1.5"/><circle cx="404" cy="126" r="3" fill="#4f46e5"/><text x="434" y="131" font-size="14" fill="#374151">难度切换：三档尺寸</text>
+  <path d="M404 178h22" stroke="#4f46e5" stroke-width="1.5"/><circle cx="404" cy="178" r="3" fill="#4f46e5"/><text x="434" y="183" font-size="14" fill="#374151">状态栏：难度与题号、计时</text>
+  <path d="M404 424h22" stroke="#4f46e5" stroke-width="1.5"/><circle cx="404" cy="424" r="3" fill="#4f46e5"/><text x="434" y="429" font-size="14" fill="#374151">棋盘：点阵、数字、线、叉</text>
+  <path d="M404 448h22" stroke="#4f46e5" stroke-width="1.5"/><circle cx="404" cy="448" r="3" fill="#4f46e5"/><text x="434" y="453" font-size="14" fill="#374151">　整块棋盘都是热区，就近选边</text>
+  <path d="M404 668h22" stroke="#4f46e5" stroke-width="1.5"/><circle cx="404" cy="668" r="3" fill="#4f46e5"/><text x="434" y="673" font-size="14" fill="#374151">工具栏：撤销 / 重做 / 清空</text>
+</svg>

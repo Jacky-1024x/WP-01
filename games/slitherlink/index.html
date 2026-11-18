@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>数回 · H5 游戏合集</title>
+  <meta name="theme-color" content="#f4f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1017" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="游戏合集">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="slitherlink.css">
+  <script type="module" src="slitherlink.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../../" aria-label="返回主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <button class="icon-btn" id="newBtn" aria-label="新题">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1>数回</h1>
+      <button class="icon-btn" data-sound-toggle aria-label="音效开关"></button>
+      <button class="icon-btn" id="helpBtn" aria-label="玩法说明">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </header>
+
+    <div class="controls-top">
+      <div class="segmented" id="levelSelect" role="group" aria-label="难度">
+        <button data-level="easy">简单 <small>5×5</small></button>
+        <button data-level="medium">中等 <small>7×7</small></button>
+        <button data-level="hard">困难 <small>10×10</small></button>
+      </div>
+      <div class="status">
+        <span id="puzzleTag"></span>
+        <span class="timer" aria-label="用时">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 12V7.5M12 12h3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span id="timer">00:00</span>
+        </span>
+      </div>
+    </div>
+
+    <main class="board-wrap" id="boardWrap">
+      <svg class="board" id="board" role="img" aria-label="数回棋盘"></svg>
+    </main>
+
+    <div class="controls">
+      <button class="tool" id="undoBtn" data-sfx="none">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H6V4M6.5 7.5A7.5 7.5 0 1 1 5 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>撤销</span>
+      </button>
+      <button class="tool" id="redoBtn" data-sfx="none">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7h3V4M17.5 7.5A7.5 7.5 0 1 0 19 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>重做</span>
+      </button>
+      <button class="tool" id="clearBtn" data-sfx="none">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>清空</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal-card">
+      <div class="result-badge" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M10 10h28v28H10z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M16 24l6 6 11-12" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>完成！</h2>
+      <p id="resultDetail"></p>
+      <div class="record" id="resultRecord" hidden>新纪录！</div>
+      <div class="stats" id="resultStats"></div>
+      <div class="actions">
+        <button class="btn" id="resultClose">查看棋盘</button>
+        <button class="btn primary" id="resultAgain">下一题</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h2>放弃本题？</h2>
+      <p id="confirmText"></p>
+      <div class="actions">
+        <button class="btn" data-close>取消</button>
+        <button class="btn primary" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modal-card help">
+      <h2>玩法说明</h2>
+      <ul>
+        <li>在点与点之间连线，画出<b>一条</b>闭合回路，不能交叉、不能分叉。</li>
+        <li>数字表示这一格四条边中有几条是回路；空白格不限制。</li>
+        <li><b>轻点</b>一条边：空 → 线 → 叉 → 空。<b>长按</b>直接打叉 / 去叉。叉只是标记“这里不走”。</li>
+        <li>按住<b>拖动</b>可以连续画线；从一条已有的线开始拖则是擦除。</li>
+        <li>手指不用点得很准，会自动选离落点最近的边。</li>
+        <li>电脑上：左键同轻点，右键打叉，Ctrl/⌘ + Z 撤销。</li>
+      </ul>
+      <div class="setting">
+        <span>违规提示</span>
+        <div class="segmented" id="errorsSelect" role="group" aria-label="违规提示">
+          <button data-errors="off">关</button>
+          <button data-errors="on">开</button>
+        </div>
+      </div>
+      <div class="actions"><button class="btn primary" data-close>知道了</button></div>
+    </div>
+  </div>
+</body>
+</html>
