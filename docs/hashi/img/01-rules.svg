@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600.48 320.24" width="600.48" height="320.24">
+  <rect width="100%" height="100%" fill="#f4f5fb"/>
+  <text x="155.12" y="30" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#111827">题面</text>
+  <text x="445.36" y="30" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#111827">唯一解</text>
+  <rect x="30" y="45" width="250.24" height="250.24" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <circle cx="87.12" cy="68.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="155.12" cy="68.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="223.12" cy="68.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="257.12" cy="68.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="53.12" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="87.12" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="121.12" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="155.12" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="189.12" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="223.12" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="257.12" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="87.12" cy="136.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="121.12" cy="136.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="189.12" cy="136.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="257.12" cy="136.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="53.12" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="87.12" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="121.12" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="155.12" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="189.12" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="223.12" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="257.12" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="53.12" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="121.12" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="189.12" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="223.12" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="257.12" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="87.12" cy="238.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="155.12" cy="238.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="189.12" cy="238.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="257.12" cy="238.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="53.12" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="87.12" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="121.12" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="189.12" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="223.12" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="257.12" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="53.12" cy="68.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="53.12" y="74.24000000000001" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">3</text>
+  <circle cx="121.12" cy="68.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="121.12" y="74.24000000000001" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">3</text>
+  <circle cx="189.12" cy="68.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="189.12" y="74.24000000000001" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">1</text>
+  <circle cx="53.12" cy="136.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="53.12" y="142.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">4</text>
+  <circle cx="155.12" cy="136.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="155.12" y="142.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">6</text>
+  <circle cx="223.12" cy="136.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="223.12" y="142.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">3</text>
+  <circle cx="87.12" cy="204.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="87.12" y="210.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">2</text>
+  <circle cx="155.12" cy="204.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="155.12" y="210.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">6</text>
+  <circle cx="53.12" cy="238.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="53.12" y="244.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">2</text>
+  <circle cx="121.12" cy="238.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="121.12" y="244.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">1</text>
+  <circle cx="223.12" cy="238.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="223.12" y="244.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">1</text>
+  <circle cx="155.12" cy="272.12" r="13.600000000000001" fill="#ffffff" stroke="#334155" stroke-width="2.04"/>
+  <text x="155.12" y="278.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#111827">2</text>
+  <rect x="320.24" y="45" width="250.24" height="250.24" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <circle cx="377.36" cy="68.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="445.36" cy="68.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="513.36" cy="68.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="547.36" cy="68.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="343.36" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="377.36" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="411.36" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="445.36" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="479.36" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="513.36" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="547.36" cy="102.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="377.36" cy="136.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="411.36" cy="136.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="479.36" cy="136.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="547.36" cy="136.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="343.36" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="377.36" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="411.36" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="445.36" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="479.36" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="513.36" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="547.36" cy="170.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="343.36" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="411.36" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="479.36" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="513.36" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="547.36" cy="204.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="377.36" cy="238.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="445.36" cy="238.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="479.36" cy="238.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="547.36" cy="238.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="343.36" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="377.36" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="411.36" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="479.36" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="513.36" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <circle cx="547.36" cy="272.12" r="1.36" fill="#d1d5db"/>
+  <line x1="343.36" y1="64.38000000000001" x2="411.36" y2="64.38000000000001" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="343.36" y1="71.86" x2="411.36" y2="71.86" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="343.36" y1="68.12" x2="343.36" y2="136.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="411.36" y1="68.12" x2="479.36" y2="68.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="343.36" y1="132.38" x2="445.36" y2="132.38" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="343.36" y1="139.86" x2="445.36" y2="139.86" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="343.36" y1="136.12" x2="343.36" y2="238.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="445.36" y1="132.38" x2="513.36" y2="132.38" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="445.36" y1="139.86" x2="513.36" y2="139.86" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="441.62" y1="136.12" x2="441.62" y2="204.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="449.1" y1="136.12" x2="449.1" y2="204.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="513.36" y1="136.12" x2="513.36" y2="238.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="377.36" y1="200.38" x2="445.36" y2="200.38" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="377.36" y1="207.86" x2="445.36" y2="207.86" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="441.62" y1="204.12" x2="441.62" y2="272.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="449.1" y1="204.12" x2="449.1" y2="272.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <line x1="343.36" y1="238.12" x2="411.36" y2="238.12" stroke="#475569" stroke-width="3.06" stroke-linecap="round"/>
+  <circle cx="343.36" cy="68.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="343.36" y="74.24000000000001" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">3</text>
+  <circle cx="411.36" cy="68.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="411.36" y="74.24000000000001" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">3</text>
+  <circle cx="479.36" cy="68.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="479.36" y="74.24000000000001" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">1</text>
+  <circle cx="343.36" cy="136.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="343.36" y="142.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">4</text>
+  <circle cx="445.36" cy="136.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="445.36" y="142.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">6</text>
+  <circle cx="513.36" cy="136.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="513.36" y="142.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">3</text>
+  <circle cx="377.36" cy="204.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="377.36" y="210.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">2</text>
+  <circle cx="445.36" cy="204.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="445.36" y="210.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">6</text>
+  <circle cx="343.36" cy="238.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="343.36" y="244.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">2</text>
+  <circle cx="411.36" cy="238.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="411.36" y="244.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">1</text>
+  <circle cx="513.36" cy="238.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="513.36" y="244.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">1</text>
+  <circle cx="445.36" cy="272.12" r="13.600000000000001" fill="#22c55e" stroke="#22c55e" stroke-width="2.04"/>
+  <text x="445.36" y="278.24" font-family="-apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" text-anchor="middle" fill="#fff">2</text>
+</svg>
